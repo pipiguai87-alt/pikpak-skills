@@ -6,6 +6,8 @@ description: |
   - 用户提到「清理广告」「广告文件」「垃圾文件」「推广文件」「PikPak 广告」
   - 用户说磁力/种子下载的资源里有夹带的网址、宣传图、txt 广告想删掉
   - 用户想扫描某个 PikPak 文件夹里的无关文件
+  - User says "clean up ads", "junk files in my downloads", "remove promo files", "my torrent has spam files", "PikPak junk cleanup"
+  - User asks to "scan folder for junk" or "remove ad files from my cloud drive"
   只在用户确认清单后执行删除；删除一律是移入回收站（可恢复），工具本身只读。
 ---
 

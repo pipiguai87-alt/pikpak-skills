@@ -6,6 +6,8 @@ description: |
   - 用户提到「查重」「去重」「重复文件」「多版本」「清理旧版本」「同一部电影下了好几次」
   - 用户发现同一资源存在多个清晰度/版本想清理
   - 用户说「保留最新」「保留最高清」「帮我看看哪些是重复的」
+  - User says "find duplicates", "dedupe my cloud drive", "I downloaded the same movie twice", "clean up old versions", "keep the newest/highest quality copy"
+  - User asks to "compare versions" or "save space by removing dupes"
   只在用户确认清单后执行删除；删除一律是移入回收站（可恢复），工具本身只读。
 ---
 
