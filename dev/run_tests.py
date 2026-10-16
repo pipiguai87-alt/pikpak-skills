@@ -429,5 +429,71 @@ class TestNewSkills(unittest.TestCase):
                         self.assertNotIn('"rm"', seg, f"{func.name} 不应含删除调用")
 
 
+class TestWebdavGuide(unittest.TestCase):
+    """WebDAV 指南：检查脚本的会员状态判断。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.wd = load_module("webdav_check",
+                             ROOT / "skills" / "pikpak-webdav-guide" / "scripts" / "webdav_check.py")
+
+    def test_member_detection(self):
+        """会员判断逻辑：通过 pikpak_json 的 mock 验证。"""
+        import io
+        from contextlib import redirect_stdout
+
+        orig = self.wd.pikpak_json
+
+        # 会员场景
+        self.wd.pikpak_json = lambda *a, **k: ({
+            "logged_in": True,
+            "vip": {"type": "Platinum", "status": "ok", "expire_time": "2027-01-01T00:00:00+08:00"},
+            "storage": {"total": "10 TB", "used": "1 TB", "in_trash": "0 B"},
+        }, None)
+        try:
+            import sys as _sys
+            _sys.argv = ["webdav_check.py", "--json"]
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                self.wd.main()
+            out = json.loads(buf.getvalue())
+            self.assertTrue(out["can_use_webdav"])
+        finally:
+            self.wd.pikpak_json = orig
+
+        # 非会员场景
+        self.wd.pikpak_json = lambda *a, **k: ({
+            "logged_in": True,
+            "vip": {"type": "Free", "status": "", "expire_time": ""},
+            "storage": {"total": "6 GB", "used": "1 GB", "in_trash": "0 B"},
+        }, None)
+        try:
+            import sys as _sys
+            _sys.argv = ["webdav_check.py", "--json"]
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                self.wd.main()
+            out = json.loads(buf.getvalue())
+            self.assertFalse(out["can_use_webdav"])
+        finally:
+            self.wd.pikpak_json = orig
+
+    def test_readonly(self):
+        """webdav_check 只调用 auth status（只读）。"""
+        import ast
+        src = (ROOT / "skills" / "pikpak-webdav-guide" / "scripts" / "webdav_check.py").read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        calls = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and "pikpak_json" in ast.unparse(node.func):
+                calls.append(ast.unparse(node))
+        # 所有 pikpak_json 调用都必须是 auth status（或含 status 的只读调用）
+        self.assertTrue(calls, "应存在 pikpak_json 调用")
+        for c in calls:
+            self.assertIn("status", c, f"非只读调用：{c}")
+            self.assertNotIn('"rm"', c)
+            self.assertNotIn('"task"', c.lower().replace("auth", ""))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

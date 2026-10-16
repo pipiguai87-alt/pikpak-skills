@@ -17,7 +17,8 @@
         "pikpak-storage-report",
         "pikpak-telegram-bot",
         "pikpak-media-index",
-        "pikpak-search"
+        "pikpak-search",
+        "pikpak-webdav-guide"
       ]
     },
     {
