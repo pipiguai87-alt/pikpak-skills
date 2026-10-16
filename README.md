@@ -33,9 +33,9 @@ brew install pikcloud/tap/pikpak-cli
 再安装技能（以 skills CLI 为例）：
 
 ```bash
-npx skills add isjiamu/pikpak-skills --skill pikpak-onboarding
-npx skills add isjiamu/pikpak-skills --skill pikpak-ad-cleaner
-npx skills add isjiamu/pikpak-skills --skill pikpak-dedup
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-onboarding
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-ad-cleaner
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-dedup
 ```
 
 ## 关于邀请码
