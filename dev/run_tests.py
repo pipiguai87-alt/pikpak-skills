@@ -292,5 +292,43 @@ class TestBatchBackup(unittest.TestCase):
             self.assertNotIn(forbidden, src)
 
 
+class TestTaskGuardian(unittest.TestCase):
+    """任务守护：通知触发与去重、状态持久化。"""
+
+    @classmethod
+    def setUpClass(cls):
+        import tempfile
+        cls.tg = load_module("task_guardian",
+                             ROOT / "skills" / "pikpak-task-guardian" / "scripts" / "task_guardian.py")
+        cls.tmp = Path(tempfile.mkdtemp())
+        cls.tg.STATE_PATH = cls.tmp / "state.json"
+        cls.tg.WATCH_PATH = cls.tmp / "watch.json"
+        cls.notes = []
+        cls.tg.notify = lambda title, msg: cls.notes.append((title, msg))
+        cls.fixture = {"tasks": [
+            {"id": "t1", "name": "running", "status": "Running"},
+            {"id": "t2", "name": "done", "status": "Complete"},
+            {"id": "t3", "name": "failed", "status": "Error"},
+        ]}
+
+    def test_notifications_and_dedup(self):
+        self.notes.clear()
+        state = self.tg.once(self.fixture)
+        self.assertTrue(any("完成" in t for t, _ in self.notes))
+        self.assertTrue(any("失败" in t for t, _ in self.notes))
+        # 第二次不应重复通知
+        self.notes.clear()
+        self.tg.once(self.fixture)
+        self.assertEqual(self.notes, [])
+        saved = json.loads((self.tmp / "state.json").read_text(encoding="utf-8"))
+        self.assertIn("t2", saved["seen_done"])
+
+    def test_guardian_no_file_ops(self):
+        src = (ROOT / "skills" / "pikpak-task-guardian" / "scripts" / "task_guardian.py").read_text(encoding="utf-8")
+        # 守护脚本只允许 task 子命令 + osascript，不得有文件删除
+        for forbidden in ['"files"', '"rm", "--delete-files"', '"batchDelete"']:
+            self.assertNotIn(forbidden, src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

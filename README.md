@@ -12,6 +12,10 @@
 | **pikpak-dedup** | 同一资源的多个版本（不同清晰度/压制版）查重分组，按策略保留最优、清理旧版 |
 | **pikpak-storage-report** | 空间体检：目录体积排行、大文件 TOP、回收站占用、可清理建议 |
 | **pikpak-telegram-bot** | Telegram 遥控：手机发链接即转存、查任务进度（自托管长轮询 bot） |
+| **pikpak-media-index** | 媒体库索引：视频元数据（时长/分辨率/编码/来源）生成 Markdown/CSV 表 |
+| **pikpak-share-manager** | 分享管理：批量创建、过期检查、访问统计、安全分享建议 |
+| **pikpak-batch-backup** | 批量备份：云盘内容拉回本地，断点续传 + 清单核对 |
+| **pikpak-task-guardian** | 任务守护：失败重试、完成通知、状态汇总 |
 
 ## 设计原则
 
@@ -42,6 +46,10 @@ npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-ad-cleaner
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-dedup
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-storage-report
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-telegram-bot
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-media-index
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-share-manager
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-batch-backup
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-task-guardian
 ```
 
 ## 关于邀请码
