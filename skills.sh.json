@@ -1,0 +1,21 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "入门",
+      "description": "新用户从零开始使用 PikPak：安装、注册、第一个云下载任务。",
+      "skills": [
+        "pikpak-onboarding"
+      ]
+    },
+    {
+      "title": "云盘维护",
+      "description": "保持资源库整洁：清理广告垃圾文件、多版本查重与旧版清理。所有操作只读扫描 + 用户确认 + 移入回收站。",
+      "skills": [
+        "pikpak-ad-cleaner",
+        "pikpak-dedup"
+      ]
+    }
+  ]
+}
