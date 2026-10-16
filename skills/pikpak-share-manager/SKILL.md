@@ -64,9 +64,20 @@ pikpak share rm <shareID> [shareID...]
 
 ## 定期检查工作流
 
+用本 skill 的审计脚本一键完成：
+
+```bash
+python3 scripts/share_audit.py                    # 人类可读报告
+python3 scripts/share_audit.py --json report.json # 结构化报告
+```
+
+脚本会标记：已过期 / 7 天内将过期 / 30 天以上零访问的分享，并给出建议的 `pikpak share rm` 命令（**由用户确认后自行执行，脚本不代删**）。
+
+手动方式（了解原理）：
+
 1. `pikpak share ls -F json` 拉全量列表（翻页用 `--token`）
 2. 检查每个分享的 `expiration` 与 `views` 字段：
-   - 已过期或即将过期的：问用户是否续期（删除重建）
+   - 已过期或即将过期的：问用户是否清理（删除重建才能续期）
    - 零访问的老分享：问用户是否清理
 3. 汇报给用户：共 N 个分享，其中 X 个已过期、Y 个 30 天内将过期、Z 个零访问
 

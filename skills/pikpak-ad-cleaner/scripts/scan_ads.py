@@ -193,12 +193,14 @@ def classify(f: dict):
             why += f"，含推广词：{'、'.join(strong[:3])}"
         return "review", [why]
 
-    # 4) 文本/图片类
+    # 4) 文本/图片类（单个推广词降级为待确认，避免误伤「宣传海报」类正常文件名）
     if junkish:
         if has_domain:
             return "high", ["文件名含网址"]
-        if strong:
-            return "high", [f"含推广词：{'、'.join(strong[:3])}"]
+        if len(strong) >= 2:
+            return "high", [f"含多个推广词：{'、'.join(strong[:3])}"]
+        if len(strong) == 1:
+            return "review", [f"含推广词：{strong[0]}（需人工确认）"]
         if len(weak) >= 2:
             return "review", [f"含多个弱推广词：{'、'.join(weak[:3])}"]
         return None, []

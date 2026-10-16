@@ -1,0 +1,40 @@
+{
+  "shares": [
+    {
+      "share_id": "SHARE_EXPIRED_1",
+      "title": "过期分享",
+      "status": "EXPIRED",
+      "views": 12,
+      "expiration": "2026-10-01T00:00:00+00:00",
+      "created": "2026-09-01T00:00:00+00:00",
+      "files": 3
+    },
+    {
+      "share_id": "SHARE_SOON_1",
+      "title": "快过期的",
+      "status": "OK",
+      "views": 5,
+      "expiration": "2026-10-19T00:00:00+00:00",
+      "created": "2026-10-12T00:00:00+00:00",
+      "files": 1
+    },
+    {
+      "share_id": "SHARE_FOREVER_1",
+      "title": "永久分享",
+      "status": "OK",
+      "views": 42,
+      "expiration": -1,
+      "created": "2026-08-01T00:00:00+00:00",
+      "files": 2
+    },
+    {
+      "share_id": "SHARE_ZERO_1",
+      "title": "没人看的",
+      "status": "OK",
+      "views": 0,
+      "expiration": -1,
+      "created": "2026-08-15T00:00:00+00:00",
+      "files": 1
+    }
+  ]
+}

@@ -330,5 +330,39 @@ class TestTaskGuardian(unittest.TestCase):
             self.assertNotIn(forbidden, src)
 
 
+class TestShareAudit(unittest.TestCase):
+    """分享审计：过期/临期/零访问标记。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sa = load_module("share_audit",
+                             ROOT / "skills" / "pikpak-share-manager" / "scripts" / "share_audit.py")
+
+    def test_audit_flags(self):
+        fixture = json.loads((ROOT / "dev" / "fixtures" / "shares.json").read_text(encoding="utf-8"))
+        report = self.sa.audit(fixture["shares"])
+        by_id = {r["share_id"]: r for r in report}
+        self.assertIn("已过期", by_id["SHARE_EXPIRED_1"]["flags"])
+        self.assertTrue(any("7 天内" in f for f in by_id["SHARE_SOON_1"]["flags"]))
+        self.assertTrue(any("零访问" in f for f in by_id["SHARE_ZERO_1"]["flags"]))
+        self.assertTrue(any("长期有效" in f for f in by_id["SHARE_FOREVER_1"]["flags"]))
+
+    def test_parse_time_formats(self):
+        p = self.sa.parse_time
+        self.assertIsNotNone(p("2026-10-01T00:00:00+00:00"))
+        self.assertIsNotNone(p(1759276800))       # 秒时间戳
+        self.assertIsNotNone(p(1759276800000))    # 毫秒时间戳
+        self.assertIsNone(p("not a time"))
+        self.assertIsNone(p(None))
+
+    def test_audit_readonly(self):
+        src = (ROOT / "skills" / "pikpak-share-manager" / "scripts" / "share_audit.py").read_text(encoding="utf-8")
+        # 只允许 share ls；不得创建/删除
+        self.assertIn('"share", "ls"', src)
+        for forbidden in ['"create"', '"rm"', '"delete"']:
+            # 允许出现在注释/建议命令字符串中，但不得出现在 subprocess 调用的参数列表
+            self.assertNotIn(f'[os.environ.get("PIKPAK_BIN", "pikpak"), "share", {forbidden}]', src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
