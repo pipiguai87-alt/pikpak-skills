@@ -1,6 +1,6 @@
 # pikpak-skills
 
-**10 个 AI Agent 技能，把你的 PikPak 网盘管得明明白白。**
+**12 个 AI Agent 技能，把你的 PikPak 网盘管得明明白白。**
 
 自动清广告垃圾、智能查重去重、手机远程转存、空间体检、媒体库索引——让云端那片混乱的资源库变成整洁的资产。
 
@@ -18,12 +18,16 @@
 | **pikpak-share-manager** | 分享管理：批量创建、过期检查、访问统计 |
 | **pikpak-batch-backup** | 批量备份：云盘内容拉回本地，断点续传 + 清单核对 |
 | **pikpak-task-guardian** | 任务守护：下载失败自动重试、完成推送到系统通知 |
+| **pikpak-search** | 云端搜索：遍历全盘按关键词/正则找文件（补官方已下线的 search） |
+| **pikpak-magnet-pipeline** | 磁力管道：磁力→云下载→拉回本地→清理，四步可断点续跑 |
 
 ## 从哪开始？
 
 **刚接触 PikPak** → `pikpak-onboarding`
 **盘里一堆垃圾/重复** → `pikpak-ad-cleaner` + `pikpak-dedup`（先扫描，看清了再清）
 **想建自己的资源流** → `pikpak-save` + `pikpak-telegram-bot`
+**找文件/搜资源** → `pikpak-search`
+**磁力下载到本地、云端不留垃圾** → `pikpak-magnet-pipeline`
 
 ### 怎么装？
 

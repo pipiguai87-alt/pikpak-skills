@@ -364,5 +364,70 @@ class TestShareAudit(unittest.TestCase):
             self.assertNotIn(f'[os.environ.get("PIKPAK_BIN", "pikpak"), "share", {forbidden}]', src)
 
 
+class TestNewSkills(unittest.TestCase):
+    """新 skill：search 与 magnet-pipeline 的核心行为。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.search = load_module("search_files",
+                                 ROOT / "skills" / "pikpak-search" / "scripts" / "search_files.py")
+        cls.pipeline = load_module("magnet_pipeline",
+                                   ROOT / "skills" / "pikpak-magnet-pipeline" / "scripts" / "magnet_pipeline.py")
+
+    def test_search_finds_by_keyword(self):
+        fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
+        files = []
+        self.search.walk("", fixture, [], files, {"files": 0, "folders": 0}, 50000)
+        self.assertGreater(len(files), 0)
+        # 关键词匹配
+        hits = []
+        for rel, f in files:
+            name = f.get("name", "")
+            path = "/".join(rel + [name])
+            if self.search.match(name, path, ["sintel"], "or", False):
+                hits.append(name)
+        self.assertGreaterEqual(len(hits), 4)  # fixture 里多个 Sintel 版本
+
+    def test_search_and_mode(self):
+        m = self.search.match
+        self.assertTrue(m("Sintel.2010.1080p.mkv", "x", ["sintel", "1080"], "and", False))
+        self.assertFalse(m("Sintel.2010.2160p.mkv", "x", ["sintel", "1080"], "and", False))
+
+    def test_pipeline_step4_prints_only(self):
+        """step4-cleanup 只打印建议命令，不执行。"""
+        import subprocess as sp
+        orig_run = sp.run
+
+        def forbidden(*a, **k):
+            raise AssertionError("step4 不应调用 subprocess")
+
+        sp.run = forbidden
+        try:
+            import io
+            from contextlib import redirect_stdout
+            import argparse
+            ns = argparse.Namespace(file_ids=["F1", "F2"])
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                self.pipeline.step4_cleanup(ns)
+            out = buf.getvalue()
+            self.assertIn("pikpak rm F1", out)
+            self.assertIn("pikpak rm F2", out)
+            self.assertIn("请确认后手动执行", out)
+        finally:
+            sp.run = orig_run
+
+    def test_pipeline_no_delete_in_source(self):
+        src = (ROOT / "skills" / "pikpak-magnet-pipeline" / "scripts" / "magnet_pipeline.py").read_text(encoding="utf-8")
+        import ast
+        tree = ast.parse(src)
+        for func in ast.walk(tree):
+            if isinstance(func, ast.FunctionDef):
+                for node in ast.walk(func):
+                    if isinstance(node, ast.Call) and "subprocess" in ast.unparse(node.func):
+                        seg = ast.unparse(node)
+                        self.assertNotIn('"rm"', seg, f"{func.name} 不应含删除调用")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

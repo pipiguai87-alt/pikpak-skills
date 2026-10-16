@@ -16,7 +16,8 @@
         "pikpak-save",
         "pikpak-storage-report",
         "pikpak-telegram-bot",
-        "pikpak-media-index"
+        "pikpak-media-index",
+        "pikpak-search"
       ]
     },
     {
@@ -27,7 +28,8 @@
         "pikpak-dedup",
         "pikpak-share-manager",
         "pikpak-batch-backup",
-        "pikpak-task-guardian"
+        "pikpak-task-guardian",
+        "pikpak-magnet-pipeline"
       ]
     }
   ]
