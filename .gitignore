@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 测试产物
+/tmp/
+*.log
+
+# 系统
+.DS_Store

@@ -1,0 +1,55 @@
+{
+  "": {
+    "": {
+      "files": [
+        {"id": "fld_movies", "name": "Movies", "kind": "drive#folder"}
+      ],
+      "next_page_token": ""
+    }
+  },
+  "fld_movies": {
+    "": {
+      "files": [
+        {"id": "fld_bbb", "name": "Big Buck Bunny", "kind": "drive#folder"},
+        {"id": "fld_sintel", "name": "Sintel", "kind": "drive#folder"}
+      ],
+      "next_page_token": ""
+    }
+  },
+  "fld_bbb": {
+    "": {
+      "files": [
+        {"id": "f_flv", "name": "高清影视大全 _ www.kuai-kan.example.com.mp4", "kind": "drive#file", "size": "5242880", "modified_time": "2026-10-01T10:00:00+08:00", "params": {"duration": "45"}},
+        {"id": "f_url", "name": "最新地址.url", "kind": "drive#file", "size": "512", "modified_time": "2026-10-01T10:00:00+08:00"},
+        {"id": "f_txt", "name": "【收藏用】防失联发布页 加群领取福利.txt", "kind": "drive#file", "size": "2048", "modified_time": "2026-10-01T10:00:00+08:00"},
+        {"id": "f_pwd", "name": "解压密码.txt", "kind": "drive#file", "size": "128", "modified_time": "2026-10-01T10:00:00+08:00"},
+        {"id": "f_poster", "name": "poster.jpg", "kind": "drive#file", "size": "102400", "modified_time": "2026-10-02T10:00:00+08:00"},
+        {"id": "f_card", "name": "客服二维码.png", "kind": "drive#file", "size": "15360", "modified_time": "2026-10-01T10:00:00+08:00"},
+        {"id": "f_ep1", "name": "Big.Buck.Bunny.1080p.mkv", "kind": "drive#file", "size": "1610612736", "modified_time": "2026-09-30T10:00:00+08:00", "params": {"duration": "596", "width": "1920", "height": "1080"}},
+        {"id": "f_sub", "name": "Big.Buck.Bunny.zh.srt", "kind": "drive#file", "size": "40960", "modified_time": "2026-09-30T10:00:00+08:00"}
+      ],
+      "next_page_token": "t2"
+    },
+    "t2": {
+      "files": [
+        {"id": "f_zip", "name": "sample.pack.zip", "kind": "drive#file", "size": "10485760", "modified_time": "2026-09-29T10:00:00+08:00"},
+        {"id": "f_trojan", "name": "installer.exe", "kind": "drive#file", "size": "3145728", "modified_time": "2026-09-30T10:00:00+08:00"},
+        {"id": "f_banana", "name": "banana_trailer.mp4", "kind": "drive#file", "size": "104857600", "modified_time": "2026-10-01T10:00:00+08:00", "params": {"duration": "3600"}}
+      ],
+      "next_page_token": ""
+    }
+  },
+  "fld_sintel": {
+    "": {
+      "files": [
+        {"id": "f_s1", "name": "Sintel 2010 1080p BluRay x264.mkv", "kind": "drive#file", "size": "2147483648", "modified_time": "2025-06-01T10:00:00+08:00", "hash": "SAMEFILEHASH", "params": {"width": "1920", "height": "1080"}},
+        {"id": "f_s2", "name": "Sintel.2010.2160p.WEB-DL.HDR.mkv", "kind": "drive#file", "size": "8589934592", "modified_time": "2026-08-15T10:00:00+08:00", "params": {"width": "3840", "height": "2160"}},
+        {"id": "f_s3", "name": "sintel 2010 1080p x265 10bit.mp4", "kind": "drive#file", "size": "1288490188", "modified_time": "2024-01-10T10:00:00+08:00", "hash": "SAMEFILEHASH", "params": {"width": "1920", "height": "1080"}},
+        {"id": "f_s4", "name": "Sintel.2010.1080p.国语配音.mkv", "kind": "drive#file", "size": "3000000000", "modified_time": "2026-01-01T10:00:00+08:00", "params": {"width": "1920", "height": "1080"}},
+        {"id": "f_s5", "name": "Sintel.S01E01.1080p.mkv", "kind": "drive#file", "size": "900000000", "modified_time": "2026-02-01T10:00:00+08:00", "params": {"width": "1920", "height": "1080"}},
+        {"id": "f_tiny", "name": "Sintel.2010.poster.jpg", "kind": "drive#file", "size": "51200", "modified_time": "2026-08-16T10:00:00+08:00"}
+      ],
+      "next_page_token": ""
+    }
+  }
+}
