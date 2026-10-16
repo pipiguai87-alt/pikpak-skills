@@ -495,5 +495,42 @@ class TestWebdavGuide(unittest.TestCase):
             self.assertNotIn('"task"', c.lower().replace("auth", ""))
 
 
+class TestSpeedGuide(unittest.TestCase):
+    """速度指南：诊断脚本逻辑。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sg = load_module("speed_diag",
+                             ROOT / "skills" / "pikpak-speed-guide" / "scripts" / "speed_diag.py")
+
+    def test_recommend_all_ok(self):
+        results = [
+            {"host": "a.com", "ok": True, "total_ms": 200, "dns_ms": 20},
+            {"host": "b.com", "ok": True, "total_ms": 300, "dns_ms": 25},
+        ]
+        tips = self.sg.recommend(results)
+        self.assertTrue(any("换网络" in t for t in tips))
+
+    def test_recommend_unreachable(self):
+        results = [
+            {"host": "a.com", "ok": False, "dns_error": "timeout"},
+        ]
+        tips = self.sg.recommend(results)
+        self.assertTrue(any("不可达" in t for t in tips))
+
+    def test_recommend_slow(self):
+        results = [
+            {"host": "slow.com", "ok": True, "total_ms": 3000, "dns_ms": 50},
+        ]
+        tips = self.sg.recommend(results)
+        self.assertTrue(any("QoS" in t for t in tips))
+
+    def test_diag_is_readonly(self):
+        """诊断脚本不应含任何写操作或凭据接触。"""
+        src = (ROOT / "skills" / "pikpak-speed-guide" / "scripts" / "speed_diag.py").read_text(encoding="utf-8")
+        for forbidden in ["pikpak rm", "task add", "auth login", "password", "DELETE"]:
+            self.assertNotIn(forbidden, src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

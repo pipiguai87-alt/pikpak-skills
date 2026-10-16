@@ -1,6 +1,6 @@
 # pikpak-skills
 
-**13 AI agent skills that keep your PikPak cloud drive in order.**
+**14 AI agent skills that keep your PikPak cloud drive in order.**
 
 Wipe out bundled ad files, dedupe multi-version releases, save links remotely, run storage checkups, index your media library — turn a messy pile of downloads into a tidy, searchable collection.
 
@@ -21,6 +21,7 @@ Wipe out bundled ad files, dedupe multi-version releases, save links remotely, r
 | **pikpak-search** | Cloud search: walk the whole drive by keyword/regex (fills the official search gap) |
 | **pikpak-magnet-pipeline** | Magnet pipeline: magnet → cloud → local → cleanup, resumable stepwise |
 | **pikpak-webdav-guide** | WebDAV guide: enable → mount in Infuse/VidHub/Emby/Alist/rclone; bypass ISP throttling |
+| **pikpak-speed-guide** | Speed guide: diagnose → WebDAV bypass → local acceleration proxy (10-30MB/s) |
 
 ## Where to start?
 

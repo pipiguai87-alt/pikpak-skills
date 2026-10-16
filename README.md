@@ -1,6 +1,6 @@
 # pikpak-skills
 
-**13 个 AI Agent 技能，把你的 PikPak 网盘管得明明白白。**
+**14 个 AI Agent 技能，把你的 PikPak 网盘管得明明白白。**
 
 自动清广告垃圾、智能查重去重、手机远程转存、空间体检、媒体库索引——让云端那片混乱的资源库变成整洁的资产。
 
@@ -21,6 +21,7 @@
 | **pikpak-search** | 云端搜索：遍历全盘按关键词/正则找文件（补官方已下线的 search） |
 | **pikpak-magnet-pipeline** | 磁力管道：磁力→云下载→拉回本地→清理，四步可断点续跑 |
 | **pikpak-webdav-guide** | WebDAV 指南：开通→挂载 Infuse/VidHub/Emby/Alist/rclone，绕限速+建私人影院 |
+| **pikpak-speed-guide** | 加速指南：网络诊断→WebDAV 绕限速→本地加速代理（实测 10-30MB/s） |
 
 ## 从哪开始？
 
