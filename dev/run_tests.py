@@ -266,5 +266,31 @@ class TestTelegramBot(unittest.TestCase):
         self.assertNotIn("'rm'", src)
 
 
+class TestBatchBackup(unittest.TestCase):
+    """批量备份：路径穿越清洗 + dry-run 安全。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bb = load_module("batch_backup",
+                             ROOT / "skills" / "pikpak-batch-backup" / "scripts" / "batch_backup.py")
+
+    def test_sanitize_blocks_path_traversal(self):
+        for evil in ["../../etc/passwd", "..\\..\\windows", "/etc/hosts", ".ssh/id_rsa", "..", ""]:
+            s = self.bb.sanitize(evil)
+            self.assertNotIn("/", s)
+            self.assertNotIn("\\", s)
+            self.assertFalse(s.startswith("."), f"{evil!r} -> {s!r} 不应以点开头")
+            self.assertTrue(s)
+
+    def test_sanitize_keeps_normal(self):
+        self.assertEqual(self.bb.sanitize("normal.mp4"), "normal.mp4")
+
+    def test_writes_only_download_no_delete(self):
+        src = (ROOT / "skills" / "pikpak-batch-backup" / "scripts" / "batch_backup.py").read_text(encoding="utf-8")
+        # 备份脚本只允许 download / ls 两个子命令
+        for forbidden in ['"rm"', '"delete"', '"trash"', '"purge"', '"mv"']:
+            self.assertNotIn(forbidden, src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
