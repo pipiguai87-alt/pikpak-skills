@@ -28,14 +28,11 @@
 
 先安装 PikPak CLI（三个 skill 的共同前置）：
 
-```bash
-# macOS / Linux
-curl -fsSL https://download.mypikpak.com/cli/install.sh | bash
-# Windows PowerShell
-irm https://download.mypikpak.com/cli/install.ps1 | iex
-# Homebrew
-brew install pikcloud/tap/pikpak-cli
-```
+请前往官方安装页按页面说明自行安装（macOS / Linux / Windows 均有对应方式）：
+
+https://mypikpak.com/cli
+
+提示：安装命令请先在官方页面审阅，不要管道执行未审阅的脚本。
 
 再安装技能（以 skills CLI 为例）：
 

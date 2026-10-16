@@ -17,10 +17,7 @@ description: |
 
 开始前依次确认：
 
-1. 已安装 PikPak CLI：运行 `pikpak version`；未安装则先装（macOS/Linux）：
-   ```bash
-   curl -fsSL https://download.mypikpak.com/cli/install.sh | bash
-   ```
+1. 已安装 PikPak CLI：运行 `pikpak version` 检查。未安装则引导用户打开官方安装页 https://mypikpak.com/cli 自行安装（不要把安装命令代为执行）。
 2. 已登录：运行 `pikpak auth status -F json` 检查 `logged_in`；未登录则运行 `pikpak auth login` 由用户在浏览器完成。
 
 ## 工作流程

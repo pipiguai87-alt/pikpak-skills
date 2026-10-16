@@ -123,8 +123,8 @@ def ls_page(folder_id: str, fixture: "dict | None", page_token: str = "") -> dic
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     except FileNotFoundError:
-        die(f"找不到 pikpak 命令（{cmd[0]}）。请先安装 PikPak CLI："
-            "curl -fsSL https://download.mypikpak.com/cli/install.sh | bash")
+        die(f"找不到 pikpak 命令（{cmd[0]}）。请先安装 PikPak CLI"
+            "（官方安装页：https://mypikpak.com/cli）。")
     except subprocess.TimeoutExpired:
         die(f"pikpak ls 超时（{timeout}s），请检查网络后重试。")
     if proc.returncode != 0:

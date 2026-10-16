@@ -31,17 +31,19 @@ pikpak auth status -F json     # logged_in: true/false；未安装 CLI 则报 co
 - **未安装** → 第 1 步。
 - **已安装未登录** → 询问是否已有 PikPak 账号：有 → 第 2b 步登录；无 → 第 2a 步注册。
 
-## 1. 安装 PikPak CLI
+## 1. 安装 PikPak CLI（由用户自行完成）
+
+**不要代替用户执行任何安装器。** 把官方安装页交给用户，让用户自行审阅并安装：
+
+> 请打开官方安装页面 https://mypikpak.com/cli ，按页面说明完成安装（macOS / Linux / Windows 均有对应方式）。装好后回来告诉我。
+
+用户确认装好后验证：
 
 ```bash
-# macOS / Linux
-curl -fsSL https://download.mypikpak.com/cli/install.sh | bash
-# Windows PowerShell
-# irm https://download.mypikpak.com/cli/install.ps1 | iex
+pikpak version
 ```
 
-安装后提醒用户：新终端或 `source ~/.zshrc` 使 PATH 生效，然后 `pikpak version` 验证。
-（不想要 CLI 的用户也可直接用 PikPak 网页版/App，本指南以 CLI 为主线、网页版可辅助。）
+新终端或 `source ~/.zshrc` 使 PATH 生效。不想要 CLI 的用户也可直接用 PikPak 网页版/App，本指南以 CLI 为主线、网页版可辅助。
 
 ## 2. 注册或登录
 
