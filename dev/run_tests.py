@@ -132,6 +132,7 @@ class TestSafety(unittest.TestCase):
     SCRIPT_PATHS = (
         ROOT / "skills" / "pikpak-ad-cleaner" / "scripts" / "scan_ads.py",
         ROOT / "skills" / "pikpak-dedup" / "scripts" / "analyze_dupes.py",
+        ROOT / "skills" / "pikpak-storage-report" / "scripts" / "storage_report.py",
     )
 
     def test_subprocess_only_in_ls_page(self):
@@ -172,8 +173,10 @@ class TestSafety(unittest.TestCase):
             self.assertTrue(found, f"{path.name}: 未找到 cmd 构造（测试需更新）")
 
     def test_fixture_mode_makes_no_subprocess_or_network(self):
-        """fixture 离线模式下，两个脚本的遍历不应触发任何 subprocess 调用。"""
+        """fixture 离线模式下，脚本的遍历不应触发任何 subprocess 调用。"""
         import subprocess as sp
+        storage = load_module("storage_report",
+                              ROOT / "skills" / "pikpak-storage-report" / "scripts" / "storage_report.py")
         orig_run = sp.run
 
         def forbidden(*a, **k):
@@ -184,6 +187,10 @@ class TestSafety(unittest.TestCase):
             for mod in (scan_ads, dedup):
                 files, _ = walk_fixture(mod)
                 self.assertGreater(len(files), 0)
+            # storage 的新 API：walk_tree
+            fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
+            node = storage.walk_tree("", fixture, "根目录", {"files": 0, "folders": 0}, 50000)
+            self.assertGreater(node.size, 0)
         finally:
             sp.run = orig_run
 

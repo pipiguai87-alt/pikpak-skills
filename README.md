@@ -7,8 +7,10 @@
 | Skill | 用途 |
 |-------|------|
 | **pikpak-onboarding** | 手把手带新用户从零用上 PikPak：安装 CLI → 注册/登录 → 第一条磁力云下载 → 在线播放 |
+| **pikpak-save** | 磁力/链接/分享链一键转存：提交任务 → 跟踪进度 → 完成后播放或下载 |
 | **pikpak-ad-cleaner** | 扫描资源包里夹带的广告/推广垃圾文件（.url 快捷方式、推广文本、二维码图、宣传短片），分级报告后确认清理 |
 | **pikpak-dedup** | 同一资源的多个版本（不同清晰度/压制版）查重分组，按策略保留最优、清理旧版 |
+| **pikpak-storage-report** | 空间体检：目录体积排行、大文件 TOP、回收站占用、可清理建议 |
 
 ## 设计原则
 
@@ -34,8 +36,10 @@ brew install pikcloud/tap/pikpak-cli
 
 ```bash
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-onboarding
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-save
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-ad-cleaner
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-dedup
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-storage-report
 ```
 
 ## 关于邀请码

@@ -10,6 +10,14 @@
       ]
     },
     {
+      "title": "日常使用",
+      "description": "最常用的日常操作：转存链接、体检空间。",
+      "skills": [
+        "pikpak-save",
+        "pikpak-storage-report"
+      ]
+    },
+    {
       "title": "云盘维护",
       "description": "保持资源库整洁：清理广告垃圾文件、多版本查重与旧版清理。所有操作只读扫描 + 用户确认 + 移入回收站。",
       "skills": [
