@@ -11,6 +11,7 @@
 | **pikpak-ad-cleaner** | 扫描资源包里夹带的广告/推广垃圾文件（.url 快捷方式、推广文本、二维码图、宣传短片），分级报告后确认清理 |
 | **pikpak-dedup** | 同一资源的多个版本（不同清晰度/压制版）查重分组，按策略保留最优、清理旧版 |
 | **pikpak-storage-report** | 空间体检：目录体积排行、大文件 TOP、回收站占用、可清理建议 |
+| **pikpak-telegram-bot** | Telegram 遥控：手机发链接即转存、查任务进度（自托管长轮询 bot） |
 
 ## 设计原则
 
@@ -40,6 +41,7 @@ npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-save
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-ad-cleaner
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-dedup
 npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-storage-report
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-telegram-bot
 ```
 
 ## 关于邀请码

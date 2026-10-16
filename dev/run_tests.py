@@ -214,5 +214,57 @@ class TestSafety(unittest.TestCase):
             sp.run = orig_run
 
 
+class TestTelegramBot(unittest.TestCase):
+    """Telegram bot 离线测试：白名单、消息路由、安全感。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tg_bot = load_module(
+            "tg_bot", ROOT / "skills" / "pikpak-telegram-bot" / "scripts" / "tg_bot.py")
+        # 固定 pikpak 调用为 mock
+        cls.calls = []
+
+        def fake_pikpak_json(*args, timeout=120):
+            TestTelegramBot.calls.append(args)
+            if args[0] == "task" and args[1] == "add":
+                return {"task_id": "TASK123", "file_name": "demo.mkv"}, None
+            if args[0] == "task" and args[1] == "ls":
+                return {"tasks": [{"id": "T1", "name": "demo", "status": "Running"}]}, None
+            if args[0] == "ls":
+                return {"files": [{"name": "video.mp4", "kind": "drive#file"}]}, None
+            return {}, None
+
+        cls.tg_bot.pikpak_json = fake_pikpak_json
+
+    def _fake_tg(self):
+        class FakeTG:
+            def __init__(self):
+                self.sent = []
+
+            def send(self, chat_id, text):
+                self.sent.append((str(chat_id), text))
+        return FakeTG()
+
+    def test_allowed_parse(self):
+        self.assertEqual(self.tg_bot.parse_allowed("1, 2 ,3"), {"1", "2", "3"})
+        self.assertEqual(self.tg_bot.parse_allowed(""), set())
+
+    def test_unauthorized_silently_rejected(self):
+        tg = self._fake_tg()
+        self.tg_bot.process_message(tg, {"chat": {"id": 999}, "text": "/help"}, {"111"})
+        self.assertEqual(tg.sent, [])
+
+    def test_magnet_autosave(self):
+        tg = self._fake_tg()
+        self.tg_bot.process_message(
+            tg, {"chat": {"id": 111}, "text": "magnet:?xt=urn:btih:abc"}, {"111"})
+        self.assertTrue(any("已开始转存" in t for _, t in tg.sent))
+
+    def test_bot_source_has_no_rm(self):
+        src = (ROOT / "skills" / "pikpak-telegram-bot" / "scripts" / "tg_bot.py").read_text(encoding="utf-8")
+        self.assertNotIn('"rm"', src)
+        self.assertNotIn("'rm'", src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

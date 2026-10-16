@@ -11,10 +11,11 @@
     },
     {
       "title": "日常使用",
-      "description": "最常用的日常操作：转存链接、体检空间。",
+      "description": "最常用的日常操作：转存链接、体检空间、Telegram 遥控。",
       "skills": [
         "pikpak-save",
-        "pikpak-storage-report"
+        "pikpak-storage-report",
+        "pikpak-telegram-bot"
       ]
     },
     {
