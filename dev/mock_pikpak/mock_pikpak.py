@@ -37,12 +37,17 @@ def main() -> int:
             i += 2
         elif args[i] in ("-l", "--limit") and i + 1 < len(args):
             i += 2
-        else:
+        elif args[i] == "--raw":
             i += 1
+        else:
+            print(f"mock pikpak: 不支持或不完整的参数 {args[i]!r}", file=sys.stderr)
+            return 2
 
     data = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    node = data.get(folder) or {}
-    page = node.get(token) or {"files": [], "next_page_token": ""}
+    if folder not in data or token not in data[folder]:
+        print("mock pikpak: fixture 中没有该目录/分页，不伪造空页成功", file=sys.stderr)
+        return 2
+    page = data[folder][token]
     print(json.dumps(page, ensure_ascii=False))
     return 0
 

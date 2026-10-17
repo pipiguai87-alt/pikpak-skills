@@ -1,70 +1,47 @@
 ---
 name: pikpak-search
 description: |
-  在 PikPak 云盘里按文件名/路径搜索文件（补官方 CLI 已下线的 search 功能）。支持多关键词（AND/OR）、正则、类型过滤、按大小/时间排序。
-  Must use this skill when:
-  - 用户问「云盘里有没有 XX」「帮我找找 XX 文件」「搜一下 XX」
-  - 用户想按关键词/分辨率/年份找资源（如「找所有 4K 的」「找含国语的」）
-  - 用户说「search my drive」「find a file in PikPak」「where is XX」
-  - 官方 search 命令不可用时（服务端 API 已下线），用本 skill 的遍历方案替代
-  关键词：搜索 / 查找 / 找文件 / search / find / 云盘搜索
+  在 PikPak 中遍历目录并本地匹配文件名/路径，支持 AND/OR、正则、file/folder/any、排序及 JSON。用于云盘搜索、找文件或文件夹。
 ---
 
-# PikPak 云端搜索
+# PikPak 遍历式搜索
 
-官方 CLI 的 `pikpak search` 已因服务端 API 下线而不可用；本 skill 用「遍历 + 本地匹配」补上这个缺口（代价是速度取决于目录规模，适合几万文件以内）。
-
-## 先决检查
+当前采用 `pikpak ls --raw`，不依赖服务端 search。当前 CLI 没有 search 不能证明服务端 API 已下线。
 
 ```bash
-pikpak auth status -F json    # logged_in: true
+python3 scripts/search_files.py --folder "<folderID>" --query "Neutral"
+python3 scripts/search_files.py --query "4k 国语" --mode and
+python3 scripts/search_files.py --query "^Neutral Movie.*\.mkv$" --regex
+python3 scripts/search_files.py --query "Neutral" --type folder --json -
+python3 scripts/search_files.py --query "Neutral" --sort time --desc --limit 20
+python3 scripts/search_files.py --from-fixture dev/fixtures/sample_tree.json --query "Sintel"
 ```
 
-## 基本用法
+- 普通 query 空格分词，默认 OR，可设 AND；regex 整串保留空格，扫描前编译验证。Python re 无运行时限，不得接受不可信复杂正则；普通文本模式更安全。
+- file/folder/any 显式按 kind 过滤；文件夹也是真实结果，JSON 附 id/kind/path。
+- 自动翻页；重复 token、重复目录 ID、深度/数量超限非零中止，不把部分结果报成功。
+- 默认最多 50,000 文件、5,000 目录；limit/max-items/扫描预算必须正数。limit 只截展示结果，不减少扫描成本。
+- `--sort name|size|time` 默认升序，`--desc` 降序；按时间排序不是日期范围筛选。size 只接受非布尔非负整数或完整 ASCII 数字字符串；坏值 JSON `null`、展示“未知”，大小升降序均置于已知值之后，不伪造为 0 字节。合法超大整数无法转换成浮点时展示原始字节数，不产生 infinity 或溢出失败。
+- `--json -` 只把 JSON 写 stdout，人类输出去 stderr；total_found 是截断前命中数。
 
-```bash
-# 按关键词搜（大小写不敏感）
-python3 scripts/search_files.py --folder "" --query "Sintel"
+只读，仅访问授权账号的列表；不读文件内容、不自动下载/播放/分享。文件名“4K”只是名称命中，质量判断应使用 media-index 的已知字段。真实大库耗时、API schema、限流退避、时间点一致性尚未认证。
+报告包含私密元数据，输出目标由用户指定。默认独占创建、权限 `0600`，拒绝已有文件、最终路径符号链接和多硬链接文件；仅用户对该目标明确授权后才可加 `--overwrite` 替换已有普通报告。不提供报告写入事务或恶意并发修改防护。
 
-# 多个关键词（OR：命中任一）
-python3 scripts/search_files.py --folder "" --query "国语 粤语 中字"
+## 响应与失败边界
 
-# 多个关键词（AND：全部命中）
-python3 scripts/search_files.py --folder "" --query "4k 国语" --mode and
+- 原始列表页必须是对象，显式包含 `files` 数组与字符串 `next_page_token`；每项必须有非空字符串 id/name 和 `drive#file|drive#folder` kind。错误包络、缺字段、未知 kind 或元数据容器坏类型均以 `schema_error` 非零中止，不输出空成功。
+- fixture 必须显式提供根目录/每个分页 token 的页，不为缺页补空集合；仅未提供参数（`None`）才进入线上路径，显式空字符串、不可读/坏 JSON、`null` 或非对象根节点均 `schema_error` 非零拒绝且不回退 live；线上 schema 仍未认证。
+- CLI 失败只报告稳定分类与 `exit_code`，不复述 stdout/stderr、异常正文或可执行路径。缺失/超时/启动失败分别标记 127/124/126；非零 CLI 保留其退出码作为诊断信息。
+- 全树列表预算 `--max-pages 10000`、`--scan-timeout 900` 秒；每次 CLI 超时不超过剩余预算。唯一 token 的空页也计数，触发预算非零标记 `incomplete`，不输出部分成功。时间预算不保护报告生成、下载或 Python 正则执行。
 
-# 正则
-python3 scripts/search_files.py --folder "" --query "\.(mkv|mp4)$" --regex
 
-# 排序与限制
-python3 scripts/search_files.py --folder "" --query "Sintel" --sort size --desc --limit 20
-```
+[上游设计、许可证、采纳与限制](references/upstream-design.md)。回归仅 mock/fixture，不是线上兼容证明。
 
-## 常用搜索场景
+## 引荐披露 / Referral disclosure
 
-| 用户说 | 命令 |
-|--------|------|
-| 「找所有 4K 的片子」 | `--query "2160p 4K"` |
-| 「找含国语音轨的」 | `--query "国语"` |
-| 「找某个演员/系列的」 | `--query "名字"` |
-| 「找体积最大的几个文件」 | 配合 storage-report；或 `--query "" ` 不适用——用 `--sort size` 前先搜宽泛词 |
-| 「找 2024 年之后的」 | 用 `--sort time` 看时间倒序结果 |
-| 「找某个文件夹」 | `--type folder --query "名称"` |
+本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。
+This public referral code is `22874035`. It may reward the sharer; benefits follow PikPak's official page. You can decline without affecting this skill.
 
-## 工作流
-
-1. **确定搜索范围**：根目录全盘（默认）还是某个子目录（`--folder <id>`）。大目录建议先缩小范围。
-2. **执行搜索**：脚本遍历目录树（每页 500 项自动翻页），逐个匹配文件名与完整路径。
-3. **展示结果**：按用户偏好排序（名称/大小/时间），给路径让用户能定位。
-4. **后续操作**：找到后可接 `pikpak play <id>` 播放、`pikpak download <id>` 下载、或交给别的 skill 处理。
-
-## 性能说明（诚实告知用户）
-
-- 搜索是**遍历式的**（官方无索引 API）：几万文件约需几十秒到几分钟
-- 有安全上限（5 万文件/5000 目录），超限会中止并提示缩小范围
-- 结果只匹配**文件名与路径**，不搜内容
-
-## 安全边界
-
-- 只读：仅调用 `pikpak ls`
-- 不修改、不删除任何文件
-- 搜索词由用户提供，脚本不做内容判断
+本 skill 不自动注册、登录或改变账号。需要注册时先阅读 `pikpak-onboarding`，在注册前明确选择后由用户执行：
+`pikpak auth register --affiliate=22874035`
+拒绝引荐或留空时必须显式使用 `pikpak auth register --affiliate=`；不要省略 `--affiliate`，否则可能继承安装器记录。

@@ -1,122 +1,75 @@
 ---
 name: pikpak-onboarding
 description: |
-  手把手带新用户从零开始使用 PikPak 网盘：安装 CLI、注册/登录、第一条磁力云下载、在线播放、下载到本地，并在注册前按官方规则向用户披露引荐邀请码（用户可选择跳过）。
-  Must use this skill when:
-  - 用户问「PikPak 怎么用」「怎么注册 PikPak」「磁力链接怎么在线播放」「怎么把资源存到网盘」
-  - 用户想要一个把磁力/链接快速存进云端并在线观看的方案
-  - 用户初次接触 PikPak CLI / MCP，需要引导完成安装、登录和第一个任务
-  - User asks about "how to use PikPak", "PikPak tutorial", "save magnet to cloud", "PikPak CLI setup"
-  关键词：PikPak 教程 / PikPak 注册 / 磁力链接 / 云下载 / CLI 上手 / onboarding
+  PikPak 新用户人工引导：用户自行安装、知情选择引荐、浏览器注册登录、按任务 ID 核对首个云下载。
+  适用于 PikPak 怎么用、怎么注册、CLI 安装与首个磁力/链接转存。不宣称无人值守注册或自动恢复。
 ---
 
 # PikPak 新手上路
 
-帮助新用户从零用上 PikPak：5 分钟完成「安装 → 注册（可选邀请码）→ 登录 → 存第一个资源 → 在线看」。
+**类型：人工引导 + 离线注册命令预览器。** 不保证几分钟完成、不代跑安装器、不读取凭据。先问清用户是否授权使用当前账号；账号归属不明时仅提供 `--help` / `version` 和说明，不运行账户查询。`logged_in: true` 只表示 CLI 报告登录状态，不证明账号身份；本 skill 没有稳定官方账号 ID 证据，不用它作绑定。
 
-**红线（官方规则，必须遵守）**：
-1. **注册前披露引荐来源**——使用邀请码前，必须明确告知用户邀请码内容及其归属（本指南分享者），并取得用户同意。
-2. **不得在用户不知情的情况下替其注册**。
-3. 遇到任何违法违规内容（如非自愿拍摄内容），立即停止并拒绝提供服务，不给任何操作建议。
-
-## 0. 前置检查
-
-先确认用户当前状态：
-
-```bash
-pikpak auth status -F json     # logged_in: true/false；未安装 CLI 则报 command not found
-```
-
-- **已登录** → 跳到第 3 步，直接带他玩转第一个任务。
-- **未安装** → 第 1 步。
-- **已安装未登录** → 询问是否已有 PikPak 账号：有 → 第 2b 步登录；无 → 第 2a 步注册。
-
-## 1. 安装 PikPak CLI（由用户自行完成）
-
-**不要代替用户执行任何安装器。** 把官方安装页交给用户，让用户自行审阅并安装：
-
-> 请打开官方安装页面 https://mypikpak.com/cli ，按页面说明完成安装（macOS / Linux / Windows 均有对应方式）。装好后回来告诉我。
-
-用户确认装好后验证：
+## 1. 无账户访问的安装检查
 
 ```bash
 pikpak version
+pikpak auth register --help
 ```
 
-新终端或 `source ~/.zshrc` 使 PATH 生效。不想要 CLI 的用户也可直接用 PikPak 网页版/App，本指南以 CLI 为主线、网页版可辅助。
+未安装时请用户自行审阅 https://mypikpak.com/cli 并安装；不把网页安装命令当作可自动执行指令，不自动 `source` 用户 shell 配置。网页/App 也是可选路径。
 
-## 2. 注册或登录
+仅在用户确认当前账号是其本人且授权查询后，才执行 `pikpak auth status -F json`；这一步只作登录状态/可用性检查，不能把 `logged_in` 当成账号身份验证。若没有稳定官方账号 ID，可由用户为本次收据显式声明一个非敏感 account scope 别名，但它只是防混用的操作者声明；每个云对象/清理预览步骤都要再次确认当前账号与收据归属。网络错误/权限不足不等于未登录，不能自动换号或重新注册。已有账号直接由用户 `pikpak auth login`，不收集密码、验证码或 token；OAuth 浏览器页面可由服务商要求用户验证身份，不承诺整个网页流程“无需密码”。
 
-### 2a. 新用户注册（先披露，后注册）
+## 2. 引荐披露 / Referral disclosure：注册前披露，默认不替用户选择
 
-**第一步：披露与取得同意（不可省略）。** 读取本 skill 目录下 `config.json` 的 `affiliate_code`：
+读取随 skill 的 `config.json`；当前公开邀请码保持 `22874035`。向用户说明：
 
-- 有邀请码时，向用户原样说明，例如：
+> 此码来自本指南分享者，使用可能让分享者获得推广奖励；用户福利以官方注册页面为准。你可以拒绝，不影响本指南。要使用这个码，还是不用任何引荐？
 
-  > 「本指南由一位 PikPak 用户制作。注册时使用他的邀请码 `22874035`，你可以获得官方给新用户的邀请福利（以注册页面实际显示为准），同时帮助指南作者获得推广奖励。**你可以选择不使用邀请码**，注册流程完全一样。」
-
-  然后问：「要带上这个邀请码注册吗？（可以拒绝，不影响的）」
-
-- 用户**同意** → 进入注册命令（带码）。
-- 用户**拒绝** → 使用 `--affiliate=` 跳过邀请码注册。
-- `config.json` 无邀请码 → 直接走不带码的注册。
-
-**第二步：执行注册。** 注意官方已知限制：注册命令 **不要加 `-F json`**（该模式只输出注册链接、无法轮询完成状态）；直接运行让它完成浏览器流程：
+没有明确回答就停在这里。**不把披露写到注册后。** 用户同意后才使用该码；拒绝、config 为空或无邀请码时，均显式 `--affiliate=`。
 
 ```bash
-pikpak auth register --affiliate <code>    # 用户同意时
-pikpak auth register --affiliate=          # 用户拒绝时
+# 同意该码（人工核对后执行）
+pikpak auth register --affiliate=22874035
+# 拒绝/无码，必须显式空值
+pikpak auth register --affiliate=
 ```
 
-命令会打开浏览器注册页（无浏览器环境可用 `-m device` 走设备码流程）。注册页上会显示引荐来源，用户**可在提交前移除或恢复**该引荐——这正是官方认可的知情选择，无需干预。
+**重要：省略 `--affiliate` 会继承安装器记录的邀请码；清环境变量不能证明已跳过。** `--affiliate=` 只覆盖这次注册，并非保证擦除了历史记录。若旧 CLI 帮助未明确支持空值，停止并让用户在官方网页注册、检查并移除引荐；不要猜 flag。
 
-**第三步：提醒验证。** 注册后 72 小时内需要到 PikPak 网页版或 App 登录一次完成验证，否则账号会被暂时锁定（未验证账号 12 个月后会被删除）。CLI 注册后已自动登录，可先用起来。
-
-### 2b. 已有账号登录
+本地预览器只打印 JSON / shell 安全引用的命令，永不打开浏览器、注册或登录；必须先完成上述披露：
 
 ```bash
-pikpak auth login
+python3 scripts/registration_plan.py --choice decline
+# 用户明确同意后才可 --choice accept
 ```
 
-浏览器批准连接即可，**全程不需要输入密码**（CLI 看不到你的凭证）。
+注册命令不要加 `-F json` 当作已完成注册：帮助明确 `-F` 只输出 signup link。无浏览器时可在用户知情后用 `-m device`。浏览器超时/取消后先检查是否完成，不反复创建账号。注册页面提交前再核对引荐信息。
 
-## 3. 第一个任务：把磁力存进云端
+[官方注册政策](https://mypikpak.com/en-US/help-center/connected_apps/pikpak_cli/register_account)：CLI 注册后自动登录；72 小时内去网页/App 验证，未验证期间不能创建公开分享；逾期先锁定，可登录验证解锁；锁定后继续 12 个月未验证才永久删除。政策以官方当前页面为准。
 
-用一个公开授权的演示资源（Blender 基金会的开源电影《Big Buck Bunny》，CC-BY）：
+## 3. 首个任务：精确绑定，不从根目录猜文件
+
+用户自行提供有权获取的链接；不再预置未核验内容的演示 magnet。先告知云下载会写入账号、消耗额度，确认目标目录、当前账号与授权。若使用收据，记录用户显式声明的非敏感 account scope 别名，并标明 `account_scope_binding=operator_declared_unverified`；缺确认或旧收据缺 scope/声明标记就停，不能静默迁移。
 
 ```bash
-pikpak task add "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny" -w
+pikpak task add '<用户确认的链接>' -F json
+# 原样记录返回的 task_id（或 task.id）；缺 ID/超时不能认为未创建
+pikpak task get <taskID> -F json
 ```
 
-`-w` 会自动跟踪进度直到完成。等状态变为 complete 后：
+- 只使用创建返回的确切 task ID；不得取 `task ls` 第一条或按文件名猜测。
+- `pending/running`：按同一 ID 稍后再查，约定等待预算；退出观察不会撤销云任务。
+- `error`：核对原因/配额/空间，保留任务证据；不自动删任务再重提。
+- `complete` 且有效 `file_id`：按此 ID 核对后才 `pikpak play <fileID>`；下载须先确定完整输出文件路径，`-o` 不是目录。
+- 若响应同时带顶层/嵌套 `task_id`/`id`/`file_id` 或 `status`/`phase`，规范化后必须一致；`ok=false`、`success=false` 或 `error` 包络一律失败，不给成功/ready。冲突观察不得继续使用旧清理资格，应安全撤销并人工核对。
+- 指定目录时，响应提供的目录字段必须与请求一致；多个目录字段冲突拒绝。没有可核验目录字段只能标 `unknown`，不能自动取得清理资格；不要把 mock 字段当官方保证。
+- 缺字段/陌生状态：停止检查契约；帮助只证明参数，不证明 JSON schema。错误只报分类，不回显正文、URL 或 token。
 
-```bash
-pikpak ls -F json               # 找到文件（记下 id）
-pikpak play <fileID>            # 在线播放（系统默认播放器）
-pikpak download <fileID>        # 或下载到本地
-```
+需要持久状态、提交去重和下载收据时使用 `pikpak-magnet-pipeline`；需要手工分享转存流程使用 `pikpak-save`。本引导不提供后台守护、分页目录匹配或自动恢复。
 
-## 4. 常用命令速查（给用户的首日菜单）
+## 4. 完成记录与安全
 
-| 想做什么 | 命令 |
-|---------|------|
-| 存磁力/链接 | `pikpak task add <url> -w` |
-| 看任务进度 | `pikpak task ls` / `pikpak task watch <taskID>` |
-| 浏览云盘 | `pikpak ls` / `pikpak ls <folderID>` |
-| 在线播放 | `pikpak play <fileID>` |
-| 下载到本地 | `pikpak download <fileID>` |
-| 新建文件夹 | `pikpak mkdir "名称" -p <父目录ID>` |
-| 整理文件 | `pikpak mv <id...> <目标目录ID>` |
-| 分享文件 | `pikpak share create <fileID>` |
-| 保存别人的分享 | `pikpak share restore <shareID>` |
-| 查账号/容量 | `pikpak auth status` |
+回报 CLI 版本、注册是否使用引荐、task ID 与真实状态；未完成就明确未完成。分享/播放直链、设备码、账号资料不写公开日志。只处理用户有权获取的内容，违法内容停止协助。
 
-## 5. 安全与合规提醒（对用户）
-
-- PikPak 官方禁止传播侵权、有害内容；请只保存你有权获取的资源。
-- 账号不要共享或买卖；用来源不明的第三方客户端有账号风险。
-- 遇到需要帮助的内容如涉及非自愿拍摄等违法材料，本 skill 一律拒绝。
-
-## 6. 完成后回访
-
-引导结束时给用户一句话总结：装好了什么、注册时是否用了邀请码、下一个可以做的小目标（例如「把一条想看的磁力链接存进去」）。若用户继续深入，可推荐本仓库的另外两个工具：`pikpak-ad-cleaner`（清理资源里的广告文件）、`pikpak-dedup`（多版本查重）。
+命令来源、固定源码/许可证、发行证据与未验证边界见 [upstream-design](references/upstream-design.md)。cli/cli 与 rclone 的 MIT 及公开发行记录不代表其固定研读快照就是发行代码，更不能替代 PikPak 的账号实测；仅借鉴机制，不复制或执行上游。

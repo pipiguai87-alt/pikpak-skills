@@ -1,125 +1,96 @@
 ---
 name: pikpak-webdav-guide
-description: |
-  手把手引导开通与使用 PikPak 官方 WebDAV：从会员开通检查、生成 WebDAV 凭证，到配置 Infuse / VidHub / Emby / Alist / OpenList / rclone / WinSCP 等客户端，把 PikPak 变成私人影院媒体库。
-  Must use this skill when:
-  - 用户说「WebDAV 怎么开」「怎么挂载 PikPak」「Infuse/VidHub/Emby 连 PikPak」
-  - 用户抱怨下载限速、想找绕过限速的方法（WebDAV 是官方支持的路径）
-  - 用户提到「媒体库」「私人影院」「alist 挂 pikpak」「openlist pikpak」
-  - User says "PikPak WebDAV setup", "mount PikPak in Infuse", "connect PikPak to Emby", "bypass PikPak speed limit"
-  关键词：WebDAV / 挂载 / Infuse / VidHub / Emby / Alist / OpenList / rclone / 限速 / 媒体库
+description: >-
+  Use when setting up PikPak WebDAV, mounting a personal media library, or connecting Infuse/VidHub/rclone. 引导 PikPak 官方 WebDAV 开通、客户端接入与只读验收，区分官方 WebDAV 与原生 PikPak 驱动，说明会员、权限和配额限制；不承诺绕限速。
 ---
 
-# PikPak WebDAV 开通与挂载指南
+# PikPak WebDAV 开通与客户端接入
 
-把 PikPak 从「下载工具」升级为「私人媒体库」：开通 WebDAV → 挂载到播放器 → 任意设备直连观看。
+WebDAV 的价值是标准协议和多客户端访问，**不是保证提速或绕过服务端限制**。
 
-**为什么值得做（真实用户价值）**：
-1. **绕过运营商限速**——社区实测：网页/App 下载被运营商限到 2MB/s 时，**WebDAV 通道可以绕开这一限制**（CSDN 实测验证）
-2. **媒体库体验**——Infuse/VidHub/Emby 直接挂载，海报墙+原画播放，像 Netflix 一样浏览自己的收藏
-3. **任意设备访问**——一次配置，手机/电脑/电视盒子通用
+## 1. 资格、权限与配额
 
-**前置说明（必须向用户如实告知）**：
-- WebDAV 是**会员专属功能**（免费账号不可用）
-- 区域会员单连接最高 8 MB/s；全球会员最高 20 MB/s
-- WebDAV 属于「已连接的应用」，与 CLI/MCP 等**共享月度配额的 25%**；触顶后 WebDAV 降速至约 100 KB/s，直到配额重置
+按[官方开通说明](https://mypikpak.com/zh-CN/help-center/connected_apps/webdav/how_to)：
+- 会员可开通 WebDAV；在用户当前账户页面确认权益，不以客户端能打开页面代替资格检查。
+- WebDAV 凭证具有“管理文件”权限，不只是只读密码；可下载、上传、复制、移动、重命名、建目录、移入回收站及恢复，不能永久删除或清空回收站。
+- 不向用户索要密码、token、签名直链或登录缓存；只在用户本机可信客户端中配置。
 
-## 第一步：检查会员状态
+按[官方 WebDAV 限额说明](https://mypikpak.com/zh-CN/help-center/connected_apps/webdav/speed_limit)：
+- 不单独针对 WebDAV 限速，但所有已连接应用共享下行限额，等于当前有效月度下行总配额的 25%。
+- 达到该限额后，WebDAV 下载和在线播放约为 100 KB/s，直到对应配额重置或限额提高；换客户端或增加并发不解除它。
+- 上传使用另一个已连接应用上传限额；触顶拒绝上传，不是简单降速。
+- 官方 App 不受已连接应用限额影响；总配额和其他规则仍须单独核对。
+- [官方速度说明](https://mypikpak.com/zh-CN/help-center/play_and_download/download_speed/why)列出区域会员单连接最高 8 MB/s、全球会员最高 20 MB/s。这是上限而非实际速度保证。
 
-```bash
-pikpak auth status -F json
-```
+不要把 `auth status` 的存储空间数字当成已连接应用传输配额；以官方账户页的实际配额为准。
 
-看 `vip.type` 与 `vip.expire_time`：
-- 非会员 → 告知用户 WebDAV 需要会员，可先了解价值再自行决定；不要推销，如实说明其他免费功能（网页版基础使用）
-- 已会员 → 继续
+## 2. 开通（由用户在官方端完成）
 
-## 第二步：开通 WebDAV（用户在官方端操作）
+1. 打开 [PikPak 官方网页](https://mypikpak.com/drive/all)。
+2. 进入“设置 > 访问与集成 > WebDAV”，启用 WebDAV。
+3. 创建凭证，把页面给出的服务器地址、用户名、密码保存在本机可信客户端。不要猜测固定域名或复用账户主密码。
+4. 可在“账号与安全 > 已连接的应用”查看活动、移除凭证。凭证暴露时先撤销再生成，不在聊天中核验密码值。
 
-引导用户自行操作（我们不代操作）：
+## 3. 选择客户端路径
 
-1. 打开 PikPak 网页版或 App：https://mypikpak.com/drive/all
-2. 进入「设置 → 访问与集成 → WebDAV」
-3. 启用 WebDAV，创建凭证
-4. PikPak 会显示三样东西：**服务器地址、用户名、密码**
+### A. Infuse / VidHub / 支持 WebDAV 的文件管理器
 
-**安全提醒**（重要）：
-- WebDAV 凭证的权限是「管理文件」（可查看/上传/移动/删除到回收站）
-- 妥善保管，不要分享给他人；如泄露，在「账号与安全 > 已连接的应用」里随时移除重发
-- 不要在聊天/截图中暴露密码
+在客户端中添加 WebDAV 来源，用户自行填入官方页面给出的地址和专用凭据。先验证列目录和下载自己有权访问的中性小文件，再测试播放。具体界面和付费能力依客户端版本，不保证所有设备支持相同功能。
 
-## 第三步：配置客户端（按用户设备推荐）
+### B. rclone WebDAV（通用、可移除的专用凭据）
 
-### 方案 A：Infuse / VidHub（iOS/macOS/Apple TV 首选）
+先检查本机是否已有 rclone。不自动安装、不读取现有私密配置。
 
-1. 应用内添加「其他/WebDAV」来源
-2. 填入 PikPak 给的服务器地址、用户名、密码
-3. 选择「已保存共享」→ 保存
-4. 浏览 PikPak 目录，Infuse 会刮削生成海报墙
-
-### 方案 B：Emby / Jellyfin 服务器（NAS/媒体服务器方案）
-
-1. Emby 管理面板 → 媒体库 → 添加媒体库 → 选择「WebDAV」类型存储
-2. 或先用 rclone 挂载为本地盘，再让 Emby 读本地路径（更稳，推荐）：
-   ```bash
-   rclone config   # 添加 pikpak 远程（用官方 rclone 的 PikPak 驱动）
-   rclone mount pikpak: /mnt/pikpak --vfs-cache-mode full
-   ```
-
-### 方案 C：Alist / OpenList（多网盘聚合）
-
-1. Alist/OpenList 后台 → 存储 → 添加 → 选择「PikPak」
-2. 填账号密码（或 WebDAV 地址）
-3. 开启「Web 代理」或「WebDAV 策略」为本地代理（策略选错会报错，选「使用本地代理」最稳）
-
-### 方案 D：rclone（技术用户，全能方案）
-
-rclone 官方内置 PikPak 驱动（https://rclone.org/pikpak/）：
+用户在本机交互执行：
 
 ```bash
-rclone config          # 新建 remote，类型选 pikpak，填用户名密码
-rclone lsd pikpak:     # 测试连接，列出根目录
-rclone mount pikpak: ~/PikPak --vfs-cache-mode full   # 挂载为本地目录
-# 查看回收站：rclone ls pikpak: --pikpak-trashed-only
+rclone config
 ```
 
-### 方案 E：WinSCP / 文件管理器（Windows 直接访问）
+新建 remote（示例名称 `pikpak-dav`），**类型选 `webdav`**，服务器地址取官方页面，vendor 通常选 `other`，使用专用 WebDAV 凭据。详见 [rclone WebDAV 官方配置](https://rclone.org/webdav/)。不要把密码写成命令行参数，不使用 `-vv` 导出认证调试信息。
 
-1. WinSCP 新建会话 → 协议选 WebDAV → 填服务器地址/用户名/密码
-2. 传输设置：**同时传输拉满 + 单次传输多连接勾选**（社区实测显著提速）
-3. 连接后即可像本地文件夹一样拖拽
+在确认账号属于用户且获得连接许可后，才进行只读列目录：
 
-## 第四步：验证与提速技巧
+```bash
+rclone lsd pikpak-dav:
+```
 
-**验证清单**：
-- [ ] 客户端能列出 PikPak 根目录
-- [ ] 能播放一个视频（在线流式）
-- [ ] 下载速度与直连网页对比（社区报告 WebDAV 常能绕过运营商限速）
+需要 Emby/Jellyfin 等媒体服务器时，可评估先挂载为本地目录再添加媒体库；**不假定它们原生具备任意 WebDAV 存储选项**。挂载需要的 FUSE/WinFsp、缓存磁盘与后台进程依 OS 而异，先查 [rclone mount 官方文档](https://rclone.org/commands/rclone_mount/)，取得安装/启动授权，不代部署。
 
-**提速技巧（社区验证）**：
-1. WinSCP/客户端把「并发连接数」拉满
-2. 避开晚高峰测速（早晚对比，选快的时段用）
-3. 如果仍慢：检查是否触发已连接应用配额（`pikpak auth status -F json` 看配额用量）
+### C. 原生 PikPak 驱动（与 WebDAV 分开）
 
-## 常见问题（FAQ）
+[rclone PikPak backend](https://rclone.org/pikpak/) 的类型是 `pikpak`，使用不同认证流程，**不是把 WebDAV 凭据填进去**。OpenList 等聚合工具也要区分原生 PikPak 驱动和 WebDAV 驱动，不混用凭据、会员要求或配额结论。
 
-**Q：免费账号能用吗？**
-A：不能，WebDAV 是会员功能。
+新手优先选单客户端直连；只有确需聚合、挂载或媒体服务器时才引入更大工具。不要为了“加速”先架一套公开服务。
 
-**Q：为什么挂了 WebDAV 还是慢？**
-A：三个可能：① 触发了已连接应用 25% 配额（降速 100KB/s，等重置）；② 运营商对整个 PikPak 域名的 QoS；③ 客户端并发设置太低。逐一排查。
+## 4. 验收与故障定位
 
-**Q：凭证安全吗？**
-A：凭证可以随时在「账号与安全 > 已连接的应用」移除；建议只在信任的设备上使用。
+- [ ] 已确认用户自有账号、会员权益与 WebDAV 开通状态。
+- [ ] 专用凭据只保存在可信客户端，可在官方页面撤销。
+- [ ] 能列目录，并下载有权访问的中性小文件，文件长度/校验符合预期。
+- [ ] 若用于播放，单独验证播放与拖动；速度测试用 `pikpak-speed-guide` 同样本 A/B 测量。
+- [ ] 配额核对来自官方账户页，不把“可登录”写成“未触顶”。
+- [ ] 没有对公网开放未认证服务，没有关闭 TLS 验证，没有无界拉满并发。
 
-**Q：会占用我的传输配额吗？**
-A：会。WebDAV 与 CLI/MCP 等共同使用「已连接应用」配额（月度总配额的 25%）。日常播放够用，大批量传输建议用官方 App。
+故障顺序：401/403 先检查凭据/权限/会员；429 遵守服务端退避；约 100 KB/s 先核对配额，不直接归因 QoS；播放拖动卡顿再检查 Range 和缓存。网络、设备和服务状态可能叠加，不能只凭一个现象认定根因。
 
-**Q：能挂几个客户端？**
-A：官方未限制数量，但所有已连接应用共享同一 25% 配额。
+## 附带检查脚本的限制
 
-## 安全边界
+`scripts/webdav_check.py` 是账号元数据提示工具，不会生成 WebDAV 凭据，也不测 WebDAV 可连接性或实际传输配额。默认拒绝访问账号；开发/演示使用中性 JSON fixture：
 
-- 本 skill 只做**引导与验证**，所有官方操作（开 WebDAV、生成凭证）由用户完成
-- 不接触、不代填用户的 WebDAV 密码
-- 只服务用户自己的账号；帮助他人配置时需本人知情
+```bash
+python3 scripts/webdav_check.py --from-fixture /path/to/neutral-metadata.json --json
+```
+
+只有用户确认账号归属并授权本次查询后，才允许 `--account-owner-confirmed --json`；该开关是许可声明，不会验证实际所有权。显式空的 `--from-fixture` 路径同样只作离线输入错误，不能回退账号查询。`storage.total/used/in_trash` 只保留有界非负整数字节或严格容量展示文本，嵌套对象、任意文本、布尔及非法数值均为 `null`，人类和 JSON 输出不包含其原始内容。`logged_in` 缺失或为 `null` 时保持未知、不建议重新登录；只有明确 `false` 才提示未登录。会员类型仅归一化本适配器支持的 `platinum/free/none`，状态仅支持 `ok/active/expired/inactive/disabled`；其他字符串置为 `unknown`，不导出原值。到期时间只接受有界、带时区的 ISO 时间并规范化输出，非法值置空；过期、缺失、未知会员字段不推断为有效。这些只是中性 fixture 契约，不证明真实 CLI 字段兼容或账号权益；`membership.state` 只是 CLI 元数据提示。`can_use_webdav` 保持 `null`、`webdav_connection=not_tested`、`transfer_quota.state=unknown`，直到另外完成服务端/账户页验收。不要把未知渲染成“否”或诱导购买。
+
+GitHub 设计来源、许可证和适配理由见 [references/upstream-design.md](references/upstream-design.md)。
+
+## 引荐披露 / Referral disclosure
+
+本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。
+This public referral code is `22874035`. It may reward the sharer; benefits follow PikPak's official page. You can decline without affecting this skill.
+
+本 skill 不自动注册、登录或改变账号。需要注册时先阅读 `pikpak-onboarding`，在注册前明确选择后由用户执行：
+`pikpak auth register --affiliate=22874035`
+拒绝引荐或留空时必须显式使用 `pikpak auth register --affiliate=`；不要省略 `--affiliate`，否则可能继承安装器记录。

@@ -1,79 +1,82 @@
 ---
 name: pikpak-dedup
 description: |
-  分析 PikPak 云盘里的重复/多版本资源（同一影片的多个清晰度、不同压制版本），按所选策略给出「保留哪个、清理哪些」的建议清单，用户确认后将旧版本移入回收站。
-  Must use this skill when:
-  - 用户提到「查重」「去重」「重复文件」「多版本」「清理旧版本」「同一部电影下了好几次」
-  - 用户发现同一资源存在多个清晰度/版本想清理
-  - 用户说「保留最新」「保留最高清」「帮我看看哪些是重复的」
-  - User says "find duplicates", "dedupe my cloud drive", "I downloaded the same movie twice", "clean up old versions", "keep the newest/highest quality copy"
-  - User asks to "compare versions" or "save space by removing dupes"
-  只在用户确认清单后执行删除；删除一律是移入回收站（可恢复），工具本身只读。
+  只读分析 PikPak 重复/多版本媒体候选，适用于查重、重复文件、保留最新/最高清、find duplicates、compare versions。
+  名称候选不等于精确内容重复；先人工确认，按冻结报告逐 ID 批准，只打印命令，绝不自动删除。
 ---
 
-# PikPak 查重清理
+# PikPak 重复候选分析
 
-在同一目录树内找出同一资源的多个版本，按策略建议保留哪份、清理哪些。**只读分析 + 用户确认 + 移入回收站。**
+**只读分析 + 人工逐项核对 + 冻结批准。不是自动去重器。**
 
-## 先决条件检查
+## 1. 范围、策略与扫描
 
-1. `pikpak version` 确认 CLI 已安装；
-2. `pikpak auth status -F json` 确认 `logged_in` 为 true，否则 `pikpak auth login`。
-
-## 工作流程
-
-### 1. 确定扫描范围与保留策略
-
-询问用户扫描哪个文件夹。说明三种策略，让用户选择（默认 newest）：
-
-| 策略 | 保留哪份 | 适用场景 |
-|------|---------|---------|
-| `newest`（默认） | 修改时间最新 | 想要最新导入/更新的版本 |
-| `largest` | 体积最大 | 通常码率最高 |
-| `highest-res` | 分辨率最高 | 优先画质梯队 |
-
-### 2. 运行分析（只读）
+先取得明确授权的目录 ID；不默认获准访问整个账号。真实账号登录/扫描需要独立授权；开发/回归只用中性 fixture。`pikpak version` 和 `pikpak ls --help` 可检查安装/参数，不证明 JSON 契约。
 
 ```bash
-python3 scripts/analyze_dupes.py --folder <folderID> --policy newest --json /tmp/pikpak-dup-report.json
+python3 scripts/analyze_dupes.py --folder '<folderID>' --policy newest --json ./pikpak-dup-report.json
 ```
 
-脚本按「文件名归一化」分组：剔除清晰度/编码/来源等包装噪音词（1080p、x264、WEB-DL…），但**保留语义 token**（集数 S01E01、音轨语言、配音版等）——语义不同不会误合并。
-
-### 3. 展示分组结果
-
-每组展示：资源标识、版本数量、建议保留项（✓）、建议清理项（✗），附带体积/时间/分辨率佐证。先给一行**量化总结**（组数 + 可释放空间），例如：
-
-> 发现 **12 组重复资源**，清理旧版可释放约 **86 GB**（保留每个资源的最新/最高清版本）。
-
-（数字从 JSON 报告的 `groups[].trash_candidates[].size` 求和得出。）
-说明分组逻辑，特别提醒用户检查：
-
-- 被列为清理的版本是否真的是旧版（而非用户刻意保留的另一个拷贝）
-- 「完全重复」（内容哈希相同）与「不同版本」的区别——前者可放心清理，后者需用户自己判断
-
-### 4. 用户确认后执行
+离线验证（仓库根目录）：
 
 ```bash
-python3 scripts/analyze_dupes.py --folder <folderID> --policy newest --emit-trash-cmd
+python3 skills/pikpak-dedup/scripts/analyze_dupes.py --from-fixture dev/fixtures/sample_tree.json --json -
 ```
 
-把生成的 `pikpak rm <id...>` 命令展示给用户并说明可恢复性，确认后执行。
+策略只决定**候选组中建议保留的项**，不表示其他项应删除：
 
-### 5. 复核与产出
+| 策略 | 指标 |
+|---|---|
+| `newest` | 最新修改时间，再比大小 |
+| `largest` | 最大字节数，再比时间；不保证实际画质 |
+| `highest-res` | 元数据分辨率长边，再比大小/时间；不保证真实画质 |
 
-- `pikpak ls` 抽查确认；
-- 报告清理了几组、几个文件、预计释放的空间（对比清理前后 `pikpak auth status -F json` 的 `storage.used`）。
+默认忽略小于 100 KB 的文件，可通过 `--min-size` 调整。先隔离视频/音频家族；PDF、ZIP、字幕和未知类型不参与版本组，避免同名文档成为影片清理项。归一名称会剔除常见清晰度/编码/来源词、保留集数/语言等，但仍是启发式，不能承诺语义不同一定不误合并。
 
-## 归一化与匹配细节
+## 2. 证据和完整性
 
-规则集中在 `scripts/analyze_dupes.py`：`QUALITY_TOKENS`（剔除词表）、`KNOWN_EXTS`、最小体积阈值（默认 100 KB，避免把小海报图卷进分组）。调整后必须重跑 `dev/run_tests.py`。
+所有组都标 `match_type=name_candidate`、`exact=false`。`evidence.same_size` 和 `remote_hash_match` 只是元数据线索；opaque `hash` 未核验算法/完整内容语义，即使与大小都相同也**不称为完全重复**。跨名称内容查重尚未实现。
 
-匹配是**保守**的：宁可漏合并（用户手动处理）也不错误合并（可能误删珍藏版本）。同名文件在不同文件夹中也会被分组——清理前要留意是否为不同合集的一部分。
+先检查 `complete=true`、`truncated=false`。文件/目录共用 ID 身份索引，仅身份及 kind/name/size/hash/params/时间证据一致时去重；冲突报 `IDENTITY_CONFLICT`，整份报告不发布候选、禁止命令。重复 token、目录环、缺页、坏响应和 CLI 失败退出 2，写入 incomplete 状态而非伪完整候选。默认文件上限 50000（`--max-items`），另有 5000 文件夹、10000 页、100 活动目录深度预算；触顶另标 `truncated=true`。`--json -` 只输出 JSON。
 
-## 安全边界
+size 只接受非负整数或纯十进制数字串；缺失/负数/布尔值/浮点数/单位文本保留 `null`，不抓取其中数字、不当作 0。`unknown_size_files` / `size_complete` 与枚举 complete 分开；未知项保存在 `unassessed_files`，同名组若含未知大小则放入 `unassessed_groups`（`keeper=null,trash_candidates=[]`），不以三种策略产生确定性保留建议、不用于阈值或 same_size/hash 证据；`analysis_complete=false` 不是“没有重复”。
 
-- **只读分析**：脚本只调用 `pikpak ls`（源码级保证，有回归测试覆盖）
-- **用户确认**：每个待清理项都必须经用户过目
-- **可恢复**：`pikpak rm` 移入回收站，误删可恢复
-- **不做内容判断**：只按文件名与元数据分组，不评判资源内容
+width/height 分别只接受 1–2147483647 的整数或纯 ASCII 十进制整数串（允许前导零），这是本地元数据支持范围，不是画质保证。缺失、零、负数、符号/单位/空白、浮点数、布尔值、容器及超范围值均为未知，绝不抽取其中数字；任一维未知则 `resolution=""`，不制造单边分辨率。`highest-res` 只在组内每项宽高均有效时按长边比较。一项已知、一项未知或 `params` 缺失/部分维度时不能确定最高分辨率；若 `params` 明确提供了 `width`/`height` 而任一值非法，三个策略一律把整组放入 `unassessed_groups`，`reason=unknown_resolution`、`keeper=null`、`trash_candidates=[]`、`analysis_complete=false`，不生成排序、keeper、重复/清理建议，也不回显原始嵌套值。仅缺失/部分维度且选择 `newest`/`largest` 时仍可按明确的时间/大小指标处理；证据不足的组 ID 不能从冻结报告批准清理。枚举 `complete` 和 `size_complete` 可仍为 true。
+
+显式 fixture 必须为 UTF-8 JSON 对象，null/坏文件/空路径不回退 live。可选时间缺失/null 归一为空字符串，非空时间须为有效 ISO 字符串；`--max-items` 为正整数，`--min-size` 非负，`PIKPAK_TIMEOUT` 为 1–86400 整数秒。输入/配置/展示失败统一退出 2，`--json -` 仍输出失败 JSON；CLI 原 stdout/stderr 不进入错误报告，仅保留安全分类及退出码。目标不可写时失败 JSON 改送 stdout 并标 `REPORT_WRITE_FAILED`，禁止使用旧目标。
+
+展示组内所有 ID/路径/大小/时间/分辨率，保留项与候选项分别核对。`trash_candidates` 只是兼容字段名，不代表已批准。候选体积仅加已知 size、另报未知项，不是已释放或保证可释放容量；不同合集、音轨、版本仍需人工判断。
+
+## 3. 冻结批准后仅打印
+
+审核同一报告，记录原始字节摘要与批准 ID：
+
+```bash
+shasum -a 256 ./pikpak-dup-report.json
+python3 scripts/analyze_dupes.py --from-report ./pikpak-dup-report.json \
+  --report-sha256 '<审核时记录的64位SHA256>' --approve-id '<明确批准的候选ID>' \
+  --emit-trash-cmd
+```
+
+多项重复 `--approve-id`。不允许重新扫描时直接生成命令。报告变更、未完成报告、非候选 ID、keeper、危险 ID 整批拒绝；ID 不做修复。每 30 项一批，**只打印，不执行**。
+
+`rm` 帮助未独立证明可恢复语义，不承诺移入回收站或立即释放空间。只有另行核验当前官方的可恢复契约、用户明确授权对象与动作后，外部执行者才可考虑操作；未证实可恢复时止于清单，绝不使用永久删除。执行后如有授权须逐批准 ID 对账，不凭抽查宣称完成。
+
+## 维护
+
+`python3 dev/test_maturity_cleanup.py`（同次设置 `TMPDIR` 为受控临时目录、`PYTHONDONTWRITEBYTECODE=1`；独立入口和 unittest 加载均自动进入 offline_environment，额外硬拒绝子进程/网络/通知） 独立离线覆盖；父级 runner 单独整合。上游证据、采纳/拒绝、未实现内容见 [upstream-design.md](references/upstream-design.md)。未验收真实 CLI/schema/hash、命名误报率、删除恢复与配额；报告输出已强制 0600 并拒绝 symlink/非普通文件/多硬链接；尚未做原子写、总期限和恢复检查点。
+
+## 输入、报告权限与资源边界
+
+输入文件（fixture；ad-cleaner/dedup 另含冻结报告）使用 `O_NONBLOCK | O_NOFOLLOW` 打开，再以 fstat 拒绝非普通文件、非当前有效用户所有、多个硬链接和组/其他用户可写的文件；最终路径 symlink、FIFO、设备、目录均拒绝，不修改输入权限。普通中性 `0644` 与私有 `0600` 输入均可用，不强制输入 0600；真实私密数据仍应放入受控私有目录。父目录 symlink/恶意本地竞态不在隔离保证内。文件读入上限 **16 MiB（16777216 字节）**，按描述符有界读取；fixture、单次 live CLI JSON、冻结报告解析前均限制对象/数组容器嵌套深度 **64**（含根，忽略字符串内括号/转义）。超限/坏 JSON 安全分类为 `INVALID_FIXTURE` / `INVALID_CLI_JSON` / `INVALID_REPORT`，退出 2；扫描失败使可写目标 `complete=false`，冻结批准失败不输出命令、不扩大批准。
+
+报告输出已在成功/失败路径拒绝 symlink、非普通文件和多个硬链接，截断前强制 `0600`；这不等于原子替换或生产验收。尚无原子写、全局墙钟期限/取消或恢复检查点。CLI stdout/stderr 仍先完整捕获，再检查单页 JSON 字节数；无 CLI 捕获期总字节/RSS 上限、展示输出字节上限或全任务累计输入预算。普通文件系统 I/O 没有墙钟截止；O_NONBLOCK 不承诺慢磁盘/网络文件系统不阻塞。
+
+## 引荐披露 / Referral disclosure
+
+本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。
+This public referral code is `22874035`. It may reward the sharer; benefits follow PikPak's official page. You can decline without affecting this skill.
+
+本 skill 不自动注册、登录或改变账号。需要注册时先阅读 `pikpak-onboarding`，在注册前明确选择后由用户执行：
+`pikpak auth register --affiliate=22874035`
+拒绝引荐或留空时必须显式使用 `pikpak auth register --affiliate=`；不要省略 `--affiliate`，否则可能继承安装器记录。

@@ -1,98 +1,50 @@
 ---
 name: pikpak-share-manager
 description: |
-  管理 PikPak 的分享链接：批量创建分享、查看分享列表与访问数据、检查过期分享、清理无用分享。适合需要定期分享资源给他人或群组的用户。
-  Must use this skill when:
-  - 用户说「创建分享」「分享这个文件给别人」「生成分享链接」「看看我的分享」
-  - 用户想检查哪些分享过期了、清理旧分享
-  - 用户提到「share」「分享管理」「分享码」
-  - User says "create a share link", "share this file", "manage my shares", "check expired shares"
-  关键词：分享 / share / 分享链接 / 分享码 / 转存 / 分享管理
+  审计 PikPak 分享列表的已知过期/临期/零访问字段，输出只读报告；提供需人工授权的分享管理指引，不自动创建或撤销分享。
+  用于分享管理、分享过期检查、share audit。
 ---
 
-# PikPak 分享管理
+# PikPak 分享审计与人工管理
 
-创建、查看、检查、清理 PikPak 分享链接。
-
-## 先决检查
+脚本只有 `share ls` 读取能力，不创建、续期、恢复或撤销分享。先确认用户授权访问账号；测试只用 fixture/mock。
 
 ```bash
-pikpak auth status -F json    # logged_in: true
+python3 scripts/share_audit.py --json ./report.json
+# 固定 UTC 审计时点，可重复复核，不依赖“今天”
+python3 scripts/share_audit.py --from-fixture dev/fixtures/shares.json --now 2026-10-16T00:00:00Z --json -
 ```
 
-## 创建分享
+## 完整性与时间约定
 
-```bash
-# 基础：分享一个文件（默认无密码、永久有效）
-pikpak share create <fileID>
+- 自动跟随 `--token`；token 耗尽才 complete=true。重复 token、重复/缺失 share_id、20 页仍未耗尽均非零退出，不返回貌似完整的报告。
+- `audited_at` 是判断基准，`generated_at` 是生成时刻，统一 UTC；接受 ISO 和数字 epoch，拒绝 NaN/Infinity/布尔值及范围溢出。`--epoch-unit auto|seconds|milliseconds` 作用于无前缀的 now/expiration/created，`s:`/`ms:` 前缀优先。auto 优先能表示的 UTC 秒，仅秒超出 datetime 范围才尝试毫秒；同时适合两种单位的数字有歧义，应显式指定单位，不按 1e9/1e12 阈值猜测。0、早期 epoch 和精确阈值均有回归；小于微秒的部分截断。
+- expiration≤基准为过期；基准<expiration≤基准+7天为临期，精确比较，不向下取整。
+- 只有适配器显式 -1 表示长期；expiration 缺失/无法解析标未知，未知不是永久。零访问只在 views 是非布尔非负整数0且 created 可解析、至少30天时标记；布尔值、字符串、负值及坏类型均为未知（JSON null），不从缺值猜测。
+- 报告按白名单保留 share_id/title/status/views/expiration_raw/expiration_parsed/created/files/flags，不输出密码或分享链接。files 只接受非布尔非负原生整数计数，其他类型为未知（JSON null）；嵌套文件对象与敏感字段绝不透传。其他可选字段也不透传嵌套对象。
+- 只输出人工复核 ID，不生成可复制 shell 撤销命令，避免远端 ID/标题命令注入。未知或零访问均不是自动删除理由。
 
-# 带标题与有效期（7 天）
-pikpak share create <fileID> -t "给朋友的电影" -e 7
+## 响应与失败边界
 
-# 带自定义密码
-pikpak share create <fileID> -t "群内分享" -p "mypass"
+- 原始 CLI 页必须是对象并显式包含 shares 数组和字符串 next_page_token；每项必须有非空字符串 share_id、字符串 title，且 ID 不重复。错误包络、缺字段或未知结构以 schema_error 非零中止。
+- fixture 是明确的完整 snapshot，可省略空 token，但带非空 token 时拒绝；CLI 未提供 `--from-fixture` 时才由内部专用未设置哨兵进入线上路径，显式空字符串、不可读/坏 JSON、`null` 或非对象根节点，以及显式传入的 `None` 均以 `schema_error` 非零拒绝且不回退 live；与原始 CLI 分页契约区分。
+- CLI 失败只报告稳定分类与 exit_code；缺失/超时/启动失败标记 127/124/126，不复述 stdout/stderr、异常正文或可执行路径。
 
-# 服务端随机密码（推荐公开分享时用）
-pikpak share create <fileID> -t "群内分享" -P
+报告包含私密元数据，输出目标由用户指定。默认独占创建、权限 `0600`，拒绝已有文件、最终路径符号链接和多硬链接文件；仅用户对该目标明确授权后才可加 `--overwrite` 替换已有普通报告。不提供报告写入事务或恶意并发修改防护。
 
-# 限制转存次数（10 次）
-pikpak share create <fileID> -r 10
-```
+## 手工管理（必须另获具体授权）
 
-`-F json` 输出 `share_id`、`share_url`、`pass_code`、`share_text`（可直接发送的完整文本）。
+先检查本机 `pikpak share --help` 及对应子命令帮助，再决定是否使用 `create/get/rm`。创建必须逐项确认文件 ID、接收人/用途、有效期、密码策略和转存上限；不得依赖“永久无密码”默认值。撤销必须先展示精确 share IDs 与影响，再取得确认，执行后读回验证；本审计脚本不会执行这些动作。
 
-**批量分享**：一次给多个文件 ID 可以创建合集分享：
+公开第三方源码没有证明官方 owner 分享列表的 expiration/views/created 字段；当前 schema 是本适配器的 fixture 契约，不是线上实测。有效期哨兵、访问统计、创建/撤销闭环都未验证。回归使用固定 now；audited_at/expiration_parsed 保留实际毫秒到微秒精度，不把判断时点截成整秒；不要修改系统时钟或放宽断言。
 
-```bash
-pikpak share create <id1> <id2> <id3> -t "合集标题" -P -e 30
-```
+[上游源码、许可证、采纳与真实边界](references/upstream-design.md)。报告包含私密元数据，勿公开。
 
-## 查看与管理
+## 引荐披露 / Referral disclosure
 
-```bash
-# 列出所有分享（含访问量、过期时间）
-pikpak share ls
+本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。
+This public referral code is `22874035`. It may reward the sharer; benefits follow PikPak's official page. You can decline without affecting this skill.
 
-# 查看单个分享详情
-pikpak share get <shareID>
-pikpak share get <shareID> -p <密码>          # 有密码的
-pikpak share get <shareID> --parent <folderID> # 浏览分享内子文件夹
-
-# 批量删除
-pikpak share rm <shareID> [shareID...]
-```
-
-## 定期检查工作流
-
-用本 skill 的审计脚本一键完成：
-
-```bash
-python3 scripts/share_audit.py                    # 人类可读报告
-python3 scripts/share_audit.py --json report.json # 结构化报告
-```
-
-脚本会标记：已过期 / 7 天内将过期 / 30 天以上零访问的分享，并给出建议的 `pikpak share rm` 命令（**由用户确认后自行执行，脚本不代删**）。
-
-手动方式（了解原理）：
-
-1. `pikpak share ls -F json` 拉全量列表（翻页用 `--token`）
-2. 检查每个分享的 `expiration` 与 `views` 字段：
-   - 已过期或即将过期的：问用户是否清理（删除重建才能续期）
-   - 零访问的老分享：问用户是否清理
-3. 汇报给用户：共 N 个分享，其中 X 个已过期、Y 个 30 天内将过期、Z 个零访问
-
-## 安全提醒（对用户说明）
-
-- 分享公共资源时用**密码 + 有效期 + 转存上限**三件套，避免链接外流
-- 分享前确认内容不含隐私信息（个人照片、文档等）
-- 不得分享法律禁止传播的内容；遇到此类请求拒绝
-- 分享链接泄露 = 任何人都能转存，创建时优先 `-P`（随机密码）
-
-## 常见问题
-
-| 症状 | 原因/处理 |
-|------|-----------|
-| 「分享创建失败」 | 检查文件是否在该账号内、是否已完成处理（未完成转码的文件不能分享） |
-| 分享访问量不涨 | 转存与访问是不同事件；`views` 统计浏览，转存看 `restore_count_left` 变化 |
-| 想撤销已发出的分享 | `pikpak share rm <shareID>` 立即失效 |
-| 分享被平台删除 | 内容违规（侵权/违法）；此类内容本 skill 不助长 |
+本 skill 不自动注册、登录或改变账号。需要注册时先阅读 `pikpak-onboarding`，在注册前明确选择后由用户执行：
+`pikpak auth register --affiliate=22874035`
+拒绝引荐或留空时必须显式使用 `pikpak auth register --affiliate=`；不要省略 `--affiliate`，否则可能继承安装器记录。

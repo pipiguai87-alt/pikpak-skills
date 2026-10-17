@@ -3,7 +3,7 @@
 """回归测试：用中性 fixture 验证两个脚本的核心行为。
 
 用法：python3 dev/run_tests.py
-不访问网络，不依赖 PikPak 账号。
+中性 fixture 与 loopback HTTP，不访问互联网或真实 PikPak 账号。
 """
 
 import importlib.util
@@ -11,8 +11,15 @@ import io
 import json
 import sys
 import unittest
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
+
+
+# The helper is shared by this parent and every explicit -I child bootstrap.
+# No PYTHONPATH/sitecustomize inheritance is trusted for the offline boundary.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from offline_guard import offline_environment
+
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURE = ROOT / "dev" / "fixtures" / "sample_tree.json"
@@ -257,7 +264,9 @@ class TestTelegramBot(unittest.TestCase):
     def test_magnet_autosave(self):
         tg = self._fake_tg()
         self.tg_bot.process_message(
-            tg, {"chat": {"id": 111}, "text": "magnet:?xt=urn:btih:abc"}, {"111"})
+            tg, {"chat": {"id": 111, "type": "private"},
+                 "from": {"id": 111, "is_bot": False},
+                 "text": "magnet:?xt=urn:btih:abc"}, {"111"})
         self.assertTrue(any("已开始转存" in t for _, t in tg.sent))
 
     def test_bot_source_has_no_rm(self):
@@ -304,7 +313,10 @@ class TestTaskGuardian(unittest.TestCase):
         cls.tg.STATE_PATH = cls.tmp / "state.json"
         cls.tg.WATCH_PATH = cls.tmp / "watch.json"
         cls.notes = []
-        cls.tg.notify = lambda title, msg: cls.notes.append((title, msg))
+        def capture_notice(title, message):
+            cls.notes.append((title, message))
+            return True
+        setattr(cls.tg, "notify", capture_notice)
         cls.fixture = {"tasks": [
             {"id": "t1", "name": "running", "status": "Running"},
             {"id": "t2", "name": "done", "status": "Complete"},
@@ -312,14 +324,19 @@ class TestTaskGuardian(unittest.TestCase):
         ]}
 
     def test_notifications_and_dedup(self):
+        from unittest.mock import patch
+        args = dict(state_path=self.tmp / "state.json", account_scope="neutral-test", enable_notifications=True)
         self.notes.clear()
-        state = self.tg.once(self.fixture)
-        self.assertTrue(any("完成" in t for t, _ in self.notes))
-        self.assertTrue(any("失败" in t for t, _ in self.notes))
-        # 第二次不应重复通知
-        self.notes.clear()
-        self.tg.once(self.fixture)
-        self.assertEqual(self.notes, [])
+        with patch.object(self.tg, "fetch_tasks", return_value=(self.fixture["tasks"], None)), \
+                patch.object(self.tg.subprocess, "run", side_effect=AssertionError("no real process in notification test")):
+            state = self.tg.once(**args)
+            self.assertTrue(any("完成" in title for title, _ in self.notes))
+            self.assertTrue(any("失败" in title for title, _ in self.notes))
+            self.assertEqual(state["events"]["complete:t2"], "delivered")
+            self.assertEqual(state["events"]["error:t3"], "delivered")
+            self.notes.clear()
+            self.tg.once(**args)
+            self.assertEqual(self.notes, [])
         saved = json.loads((self.tmp / "state.json").read_text(encoding="utf-8"))
         self.assertIn("t2", saved["seen_done"])
 
@@ -340,7 +357,8 @@ class TestShareAudit(unittest.TestCase):
 
     def test_audit_flags(self):
         fixture = json.loads((ROOT / "dev" / "fixtures" / "shares.json").read_text(encoding="utf-8"))
-        report = self.sa.audit(fixture["shares"])
+        from datetime import datetime, timezone
+        report = self.sa.audit(fixture["shares"], now=datetime(2026, 10, 16, tzinfo=timezone.utc))
         by_id = {r["share_id"]: r for r in report}
         self.assertIn("已过期", by_id["SHARE_EXPIRED_1"]["flags"])
         self.assertTrue(any("7 天内" in f for f in by_id["SHARE_SOON_1"]["flags"]))
@@ -394,28 +412,51 @@ class TestNewSkills(unittest.TestCase):
         self.assertFalse(m("Sintel.2010.2160p.mkv", "x", ["sintel", "1080"], "and", False))
 
     def test_pipeline_step4_prints_only(self):
-        """step4-cleanup 只打印建议命令，不执行。"""
-        import subprocess as sp
-        orig_run = sp.run
+        """Only a locally verified receipt may produce a non-executed command."""
+        import argparse
+        import tempfile
+        from contextlib import redirect_stderr
+        from unittest.mock import patch
 
-        def forbidden(*a, **k):
-            raise AssertionError("step4 不应调用 subprocess")
+        with tempfile.TemporaryDirectory() as folder:
+            receipt = Path(folder) / "receipt.json"
+            flow = argparse.Namespace(state=str(receipt), magnet="https://example.invalid/demo", folder="",
+                                      account_scope="neutral-test", task_id="T1", file_id="F1",
+                                      dest=str(Path(folder) / "downloads"),
+                                      _account_identity_hash=self.pipeline.identity_digest("fixture-account-id"))
 
-        sp.run = forbidden
-        try:
-            import io
-            from contextlib import redirect_stdout
-            import argparse
-            ns = argparse.Namespace(file_ids=["F1", "F2"])
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                self.pipeline.step4_cleanup(ns)
-            out = buf.getvalue()
-            self.assertIn("pikpak rm F1", out)
-            self.assertIn("pikpak rm F2", out)
-            self.assertIn("请确认后手动执行", out)
-        finally:
-            sp.run = orig_run
+            def neutral_download(*argv, **kwargs):
+                self.assertEqual(argv[:3], ("download", "F1", "-o"))
+                Path(argv[3]).write_bytes(b"neutral test file")
+                return 0, "", ""
+
+            # Obtain a real complete receipt through the same add/status/download
+            # functions, using only neutral CLI boundary responses and local bytes.
+            # Do not hand-forge stage='downloaded' or relax the rejection assertions.
+            with patch.object(self.pipeline, "pikpak_json", side_effect=[
+                    ({"task_id": "T1"}, None),
+                    ({"task_id": "T1", "status": "complete", "file_id": "F1"}, None)]), \
+                    patch.object(self.pipeline, "pikpak", side_effect=neutral_download), \
+                    redirect_stdout(io.StringIO()):
+                self.pipeline.step1_add(flow)
+                self.pipeline.step2_status(flow)
+                self.pipeline.step3_download(flow)
+            self.assertEqual(json.loads(receipt.read_text())["stage"], "downloaded")
+            args = argparse.Namespace(file_ids=["F1"], state=str(receipt),
+                                      account_scope="neutral-test", verified_local=True,
+                                      _account_identity_hash=self.pipeline.identity_digest("fixture-account-id"))
+            with patch.object(self.pipeline.subprocess, "run", side_effect=AssertionError("cleanup must never execute")):
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    self.pipeline.step4_cleanup(args)
+                self.assertIn("pikpak rm F1", buf.getvalue())
+                self.assertNotIn("pikpak rm F2", buf.getvalue())
+                self.assertIn("请确认后手动执行", buf.getvalue())
+                args.file_ids = ["F1", "F2"]
+                denied = io.StringIO()
+                with redirect_stdout(denied), redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                    self.pipeline.step4_cleanup(args)
+                self.assertEqual(denied.getvalue(), "")
 
     def test_pipeline_no_delete_in_source(self):
         src = (ROOT / "skills" / "pikpak-magnet-pipeline" / "scripts" / "magnet_pipeline.py").read_text(encoding="utf-8")
@@ -438,45 +479,37 @@ class TestWebdavGuide(unittest.TestCase):
                              ROOT / "skills" / "pikpak-webdav-guide" / "scripts" / "webdav_check.py")
 
     def test_member_detection(self):
-        """会员判断逻辑：通过 pikpak_json 的 mock 验证。"""
+        """会员元数据可提示状态，但不能证明 WebDAV 已开通/可连接。"""
         import io
+        import sys as _sys
+        from datetime import datetime, timezone
         from contextlib import redirect_stdout
+        from unittest.mock import patch
 
-        orig = self.wd.pikpak_json
+        class FixedClock(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(2026, 10, 16, tzinfo=timezone.utc).astimezone(tz)
 
-        # 会员场景
-        self.wd.pikpak_json = lambda *a, **k: ({
-            "logged_in": True,
-            "vip": {"type": "Platinum", "status": "ok", "expire_time": "2027-01-01T00:00:00+08:00"},
-            "storage": {"total": "10 TB", "used": "1 TB", "in_trash": "0 B"},
-        }, None)
-        try:
-            import sys as _sys
-            _sys.argv = ["webdav_check.py", "--json"]
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                self.wd.main()
-            out = json.loads(buf.getvalue())
-            self.assertTrue(out["can_use_webdav"])
-        finally:
-            self.wd.pikpak_json = orig
-
-        # 非会员场景
-        self.wd.pikpak_json = lambda *a, **k: ({
-            "logged_in": True,
-            "vip": {"type": "Free", "status": "", "expire_time": ""},
-            "storage": {"total": "6 GB", "used": "1 GB", "in_trash": "0 B"},
-        }, None)
-        try:
-            import sys as _sys
-            _sys.argv = ["webdav_check.py", "--json"]
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                self.wd.main()
-            out = json.loads(buf.getvalue())
-            self.assertFalse(out["can_use_webdav"])
-        finally:
-            self.wd.pikpak_json = orig
+        scenarios = [
+            ({"type": "Platinum", "status": "ok", "expire_time": "2027-01-01T00:00:00+08:00"}, "reported_current"),
+            ({"type": "Free", "status": "", "expire_time": ""}, "reported_free"),
+        ]
+        for vip, expected_state in scenarios:
+            with self.subTest(vip=vip):
+                buf = io.StringIO()
+                with patch.object(self.wd, "pikpak_json", return_value=({
+                    "logged_in": True, "vip": vip,
+                    "storage": {"total": "10 TB", "used": "1 TB", "in_trash": "0 B"},
+                }, None)), patch.object(self.wd, "datetime", FixedClock), \
+                        patch.object(_sys, "argv", ["webdav_check.py", "--json", "--account-owner-confirmed"]), \
+                        redirect_stdout(buf):
+                    self.wd.main()
+                out = json.loads(buf.getvalue())
+                self.assertEqual(out["membership"]["state"], expected_state)
+                self.assertIsNone(out["can_use_webdav"])
+                self.assertEqual(out["webdav_connection"], "not_tested")
+                self.assertEqual(out["transfer_quota"]["state"], "unknown")
 
     def test_readonly(self):
         """webdav_check 只调用 auth status（只读）。"""
@@ -532,5 +565,28 @@ class TestSpeedGuide(unittest.TestCase):
             self.assertNotIn(forbidden, src)
 
 
+def _ensure_module_cleanups(suite):
+    """Python 3.9 only drains addModuleCleanup after a tearDownModule exists.
+
+    Supply a no-op boundary, not a reset of any guard, so module ExitStacks
+    close in unittest's normal order instead of leaking mocks/private envs.
+    """
+    for item in suite:
+        if isinstance(item, unittest.TestSuite):
+            _ensure_module_cleanups(item)
+            continue
+        module = sys.modules.get(type(item).__module__)
+        if module is not None and hasattr(module, "setUpModule") and getattr(module, "tearDownModule", None) is None:
+            setattr(module, "tearDownModule", lambda: None)
+
+
+def load_tests(loader, tests, pattern):
+    discovered = loader.discover(str(ROOT / "dev"), pattern="test_*.py")
+    _ensure_module_cleanups(discovered)
+    tests.addTests(discovered)
+    return tests
+
+
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    with offline_environment():
+        unittest.main(verbosity=2)

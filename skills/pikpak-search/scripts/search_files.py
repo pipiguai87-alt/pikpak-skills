@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """PikPak 云端文件搜索（只读）：遍历目录树，按关键词匹配文件名与路径。
 
-官方 CLI 的 search 命令因服务端 API 下线而不可用；本脚本用遍历方式补上这个缺口。
+本脚本使用目录遍历，不依赖服务端 search；CLI 缺少 search 不能证明服务端 API 已下线。
 支持：多关键词（AND/OR）、正则、类型过滤、按大小/时间排序、结果数量限制。
 
 用法：
@@ -21,12 +21,32 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
+import stat
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from typing import NoReturn
+
+
+MAX_DECIMAL_DIGITS = 4000
+
+
+def bounded_json_int(text: str) -> int:
+    digits = text[1:] if text.startswith("-") else text
+    if not digits or len(digits) > MAX_DECIMAL_DIGITS:
+        raise ValueError("integer exceeds safety limit")
+    return int(text)
+
+
+def decode_json(text, context: str):
+    try:
+        return json.loads(text, parse_int=bounded_json_int)
+    except (TypeError, ValueError, OverflowError):
+        die(f"schema_error ({context})")
 
 
 def die(msg: str, code: int = 1) -> NoReturn:
@@ -34,19 +54,52 @@ def die(msg: str, code: int = 1) -> NoReturn:
     raise SystemExit(code)
 
 
-def to_int(value) -> int:
-    if value is None:
-        return 0
-    m = re.search(r"\d+", str(value))
-    return int(m.group(0)) if m else 0
+def load_fixture(path):
+    if type(path) is not str or not path:
+        die("fixture_path_invalid")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            fixture = decode_json(fh.read(), "fixture_input")
+    except (OSError, UnicodeError):
+        die("schema_error (fixture_input)")
+    if type(fixture) is not dict:
+        die("schema_error (fixture_root)")
+    return fixture
 
 
-def human_size(n: int) -> str:
+def to_int(value) -> int | None:
+    if type(value) is int:
+        if value < 0:
+            return None
+        try:
+            if len(str(value)) > MAX_DECIMAL_DIGITS:
+                return None
+        except (ValueError, OverflowError):
+            return None
+        return value
+    if (type(value) is str and len(value) <= MAX_DECIMAL_DIGITS
+            and re.fullmatch(r"[0-9]+", value)):
+        try:
+            return int(value)
+        except (ValueError, OverflowError):
+            pass
+    return None
+
+
+def human_size(n: int | None) -> str:
+    if n is None:
+        return "未知"
     if n <= 0:
         return "0 B"
     units = ("B", "KB", "MB", "GB", "TB")
     i = 0
-    value = float(n)
+    try:
+        value = float(n)
+    except (ValueError, OverflowError):
+        try:
+            return f"{n} B" if len(str(n)) <= MAX_DECIMAL_DIGITS else "未知"
+        except (ValueError, OverflowError):
+            return "未知"
     while value >= 1024 and i < len(units) - 1:
         value /= 1024.0
         i += 1
@@ -64,42 +117,88 @@ def parse_time(value: str) -> datetime:
         return datetime.min.replace(tzinfo=timezone.utc)
 
 
-def ls_page(folder_id: str, fixture: "dict | None", page_token: str = "") -> dict:
+def validate_page(data):
+    """Validate this adapter's raw listing contract; never guess an empty page."""
+    if type(data) is not dict:
+        die("schema_error (ls_root)")
+    if (any(k in data for k in ("error", "errors", "error_code", "error_description", "error_message", "code"))
+            or data.get("success", True) is not True or data.get("ok", True) is not True
+            or ("status" in data and data["status"] not in ("ok", "success"))):
+        die("schema_error (ls_envelope)")
+    if type(data.get("files")) is not list or type(data.get("next_page_token")) is not str:
+        die("schema_error (ls_collection_or_token)")
+    for row in data["files"]:
+        if (type(row) is not dict or type(row.get("id")) is not str or not row["id"].strip()
+                or type(row.get("name")) is not str or not row["name"]
+                or row.get("kind") not in ("drive#file", "drive#folder")):
+            die("schema_error (ls_item)")
+        if "modified_time" in row and type(row["modified_time"]) is not str:
+            die("schema_error (ls_modified_time)")
+        if row.get("params") is not None and type(row["params"]) is not dict:
+            die("schema_error (ls_params)")
+        if type(row.get("size")) in (dict, list):
+            die("schema_error (ls_size)")
+        if row.get("medias") is not None:
+            if type(row["medias"]) is not list:
+                die("schema_error (ls_medias)")
+            for item in row["medias"]:
+                if type(item) is not dict or (item.get("video") is not None and type(item["video"]) is not dict):
+                    die("schema_error (ls_media_item)")
+    return data
+
+
+def ls_page(folder_id: str, fixture: "dict | None", page_token: str = "", *, timeout: float | None = None) -> dict:
     """取一页目录列表。fixture 非 None 时离线读取。"""
     if fixture is not None:
-        node = fixture.get(folder_id) or {}
-        return dict(node.get(page_token) or {"files": [], "next_page_token": ""})
+        if type(fixture) is not dict:
+            die("schema_error (fixture_root)")
+        node = fixture.get(folder_id)
+        if type(node) is not dict or page_token not in node:
+            die("schema_error (fixture_page_missing)")
+        return validate_page(node[page_token])
 
     cmd = [os.environ.get("PIKPAK_BIN", "pikpak"), "ls", "--raw", "-l", "500"]
     if folder_id:
         cmd += ["-p", folder_id]
     if page_token:
         cmd += ["-t", page_token]
-    timeout = int(os.environ.get("PIKPAK_TIMEOUT", "90"))
+    cli_timeout = int(os.environ.get("PIKPAK_TIMEOUT", "90"))
+    timeout = min(cli_timeout, timeout) if timeout is not None else cli_timeout
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     except FileNotFoundError:
-        die(f"找不到 pikpak 命令（{cmd[0]}）。请先安装 PikPak CLI（官方安装页：https://mypikpak.com/cli）。")
+        die("cli_unavailable (exit_code=127)")
     except subprocess.TimeoutExpired:
-        die(f"pikpak ls 超时（{timeout}s），请检查网络后重试。")
+        die("cli_timeout (exit_code=124)")
+    except OSError:
+        die("cli_os_error (exit_code=126)")
     if proc.returncode != 0:
-        err = (proc.stderr or proc.stdout or "").strip()
-        hint = " 请先运行 `pikpak auth login` 登录。" if "UNAUTHENTICATED" in err.upper() else ""
-        die(f"pikpak ls 调用失败：{err[:400]}{hint}")
-    try:
-        return json.loads(proc.stdout)
-    except json.JSONDecodeError:
-        die("无法解析 pikpak ls 输出为 JSON。")
+        die(f"cli_failed (exit_code={proc.returncode})")
+    return validate_page(decode_json(proc.stdout, "ls_json"))
 
 
 def walk(folder_id: str, fixture: "dict | None", rel_path, out, counters, max_items: int) -> None:
     """遍历目录树，收集 (rel_path, file_dict)。"""
-    token = ""
+    visited = counters.setdefault("_folder_ids", set())
+    if folder_id in visited or len(rel_path) > 100:
+        die("目录循环或深度超过安全上限。")
+    visited.add(folder_id)
+    token, tokens = "", set()
     while True:
-        page = ls_page(folder_id, fixture, token)
-        for f in page.get("files", []):
+        if token in tokens:
+            die("分页 token 重复，搜索未完成。")
+        tokens.add(token)
+        remaining = counters.setdefault("_deadline", time.monotonic() + counters.get("_scan_seconds", 900)) - time.monotonic()
+        if counters.get("_pages", 0) >= counters.get("_max_pages", 10000) or remaining <= 0:
+            die("scan_budget_exceeded (incomplete)")
+        counters["_pages"] = counters.get("_pages", 0) + 1
+        page = ls_page(folder_id, fixture, token, timeout=remaining)
+        if time.monotonic() >= counters["_deadline"]:
+            die("scan_budget_exceeded (incomplete)")
+        for f in page["files"]:
             kind = f.get("kind")
             if kind == "drive#folder":
+                out.append((rel_path, f))
                 counters["folders"] += 1
                 if counters["folders"] > 5000:
                     die("目录数量超过安全上限（5000），已中止。请缩小搜索范围。")
@@ -109,7 +208,7 @@ def walk(folder_id: str, fixture: "dict | None", rel_path, out, counters, max_it
                 if counters["files"] > max_items:
                     die(f"文件数量超过安全上限（{max_items}），已中止。请缩小搜索范围。")
                 out.append((rel_path, f))
-        token = page.get("next_page_token", "") or ""
+        token = page["next_page_token"]
         if not token:
             break
 
@@ -133,6 +232,31 @@ def match(name: str, full_path: str, queries: list[str], mode: str, regex: bool)
     return hits  # or 模式：命中任一即可
 
 
+def write_report(path, text, *, overwrite=False):
+    """Create a private report exclusively; replacing a regular file is opt-in."""
+    fd = None
+    try:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK
+        if not overwrite:
+            flags |= os.O_EXCL
+        fd = os.open(path, flags, 0o600)
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            die("report_target_not_regular_or_has_aliases")
+        os.fchmod(fd, 0o600)
+        if overwrite:
+            os.ftruncate(fd, 0)
+        stream = os.fdopen(fd, "w", encoding="utf-8")
+        fd = None
+        with stream:
+            stream.write(text)
+    except OSError:
+        die("report_write_failed (existing_or_unsafe_target_or_io_error)")
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--folder", default="", help="搜索起点目录 ID（默认根目录）")
@@ -146,19 +270,30 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=50, help="结果数量上限（默认 50）")
     ap.add_argument("--json", dest="json_out", help='JSON 输出（"-" 到 stdout，人类可读转 stderr）')
     ap.add_argument("--max-items", type=int, default=50000, help="遍历文件数安全上限")
+    ap.add_argument("--overwrite", action="store_true", help="明确允许替换已有普通报告文件；不跟随符号链接")
+    ap.add_argument("--max-pages", type=int, default=10000, help="全树列表页数上限，超限标 incomplete")
+    ap.add_argument("--scan-timeout", type=float, default=900, help="列表扫描总秒数预算；不含报告生成/下载/正则执行")
     args = ap.parse_args()
+    if args.max_pages < 1 or not math.isfinite(args.scan_timeout) or args.scan_timeout <= 0 or args.max_items < 1:
+        die("扫描预算和 max-items 必须为有限正数。")
 
     fixture = None
-    if args.from_fixture:
-        with open(args.from_fixture, encoding="utf-8") as fh:
-            fixture = json.load(fh)
+    if args.from_fixture is not None:
+        fixture = load_fixture(args.from_fixture)
 
-    queries = args.query.split()
+    if args.limit < 1 or args.max_items < 1:
+        die("limit 和 max-items 必须为正数。")
+    queries = [args.query] if args.regex else args.query.split()
     if not queries:
         die("query 为空。")
+    if args.regex:
+        try:
+            re.compile(args.query, re.IGNORECASE)
+        except re.error as exc:
+            die(f"正则错误：{exc}")
 
     files = []
-    counters = {"files": 0, "folders": 0}
+    counters = {"files": 0, "folders": 0, "_max_pages": args.max_pages, "_scan_seconds": args.scan_timeout}
     walk(args.folder, fixture, [], files, counters, args.max_items)
 
     results = []
@@ -167,10 +302,13 @@ def main() -> None:
         full_path = "/".join(rel_path + [name])
         if args.type == "file" and f.get("kind") != "drive#file":
             continue
+        if args.type == "folder" and f.get("kind") != "drive#folder":
+            continue
         hits = match(name, full_path, queries, args.mode, args.regex)
         if hits:
             results.append({
                 "id": f.get("id", ""),
+                "kind": f.get("kind", ""),
                 "name": name,
                 "path": full_path,
                 "size": to_int(f.get("size")),
@@ -181,7 +319,10 @@ def main() -> None:
 
     # 排序
     if args.sort == "size":
-        results.sort(key=lambda r: r["size"], reverse=args.desc)
+        known = [r for r in results if r["size"] is not None]
+        unknown = [r for r in results if r["size"] is None]
+        known.sort(key=lambda r: r["size"], reverse=args.desc)
+        results = known + unknown
     elif args.sort == "time":
         results.sort(key=lambda r: parse_time(r["modified"]), reverse=args.desc)
     else:
@@ -216,8 +357,7 @@ def main() -> None:
         if args.json_out == "-":
             print(text)
         else:
-            with open(args.json_out, "w", encoding="utf-8") as fh:
-                fh.write(text)
+            write_report(args.json_out, text, overwrite=args.overwrite)
             print(f"报告已写入：{args.json_out}")
 
 

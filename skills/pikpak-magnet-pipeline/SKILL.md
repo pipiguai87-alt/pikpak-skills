@@ -1,93 +1,73 @@
 ---
 name: pikpak-magnet-pipeline
 description: |
-  PikPak 磁力全链路管道：磁力 → 云下载 → 完成任务 → 拉回本地 → 释放云端空间。四步可单独执行、可检查、可中断续跑。
-  灵感来自 GitHub 高星项目 PikPakAutoOfflineDownloadBot（511⭐）的「来去无痕迹」流程，用官方 CLI 合规实现。
-  Must use this skill when:
-  - 用户说「磁力下载到本地」「临时用一下网盘」「下完就删」「不占用网盘空间」
-  - 用户想要「磁力→本地」一条龙：云端加速下载 + 拉回本地 + 清理
-  - 用户提到「磁力管道」「magnet pipeline」「下完自动清理」
-  - User says "download magnet to local then clean up", "temporary cloud download", "magnet to disk pipeline"
-  关键词：磁力 / 管道 / 云下载 / 拉回本地 / 清理 / 来去无痕迹
+  PikPak 单资源持久分步管道：一次创建、按任务 ID 查询、单文件落盘收据、人工核验后仅打印清理建议。
+  适用于磁力/链接到本地及临时云副本。目录型 BT、无人值守删除和服务端 exactly-once 不在实现范围。
 ---
 
-# PikPak 磁力管道
+# PikPak 单资源管道
 
-把「磁力链接变成电脑上的文件、云端不留垃圾」做成一条四步流水线。**每一步单独可跑、失败可重入、清理需确认。**
+本地执行器，不是“来去无痕迹”服务。**一项资源一个 --state 文件**；同一状态文件记录来源指纹→task ID→file ID→本地路径/大小/SHA-256，并记录非敏感 `account scope` 别名、`account_scope_binding=operator_declared_unverified` 和当前登录身份的域隔离 SHA-256。别名只是操作者声明，不是身份验证；脚本只接受 `auth status -F json` 白名单位置中的稳定账号 ID，缺失或冲突就停止，不回显或保存原值。正式 CLI 的实际 JSON 字段尚未按真实账号验收确认，中性假 CLI 不代表实盘兼容。
 
-适用场景：老磁力本地下不动 → 用 PikPak 云端秒下 → 拉回本地 → 清掉云端副本释放空间。
+## 使用前
 
-## 先决检查
+先取得用户对当前本人账号、资源、目标目录、云写入与本地下载的明确授权。`--account-scope <别名>` 只记录操作者声明；step1/2/3/4 每次都必须显式传入与收据相同的别名，并重新读取当前登录身份哈希，缺失、旧收据缺身份收据、不一致或 `logged_in` 但没有稳定 ID 都拒绝。来源不明账号不查询。脚本每一步都会运行 `auth status -F json`；没有账号授权或 CLI 未返回受支持的稳定 ID 时不要启动。`--help` 不访问账号。注册/安装由用户自己完成。
 
-```bash
-pikpak auth status -F json    # logged_in: true
-```
-
-## 四步流水线
-
-### Step 1：提交磁力到云端
+以下命令从本 skill 目录运行；所有步骤保持同一个状态文件。链接是用户确认的合法来源，不提供未核验演示 magnet。
 
 ```bash
-python3 scripts/magnet_pipeline.py step1-add "magnet:?xt=urn:btih:..." 
-# 可选指定云盘目标目录：--folder <folderID>
+python3 scripts/magnet_pipeline.py step1-add '<授权链接>' --account-scope <当前账号别名> --state ./job-1.json
+# 可加 --folder <folderID>；本 CLI 不支持 add 改名，已删除无效 --name
+python3 scripts/magnet_pipeline.py step2-status <返回的taskID> --account-scope <同一账号别名> --state ./job-1.json
+python3 scripts/magnet_pipeline.py step3-download <确认的fileID> --dest ./downloads --account-scope <同一账号别名> --state ./job-1.json
+# 只有用户确认本地内容正确后才加此标记；仍然不执行任何删除
+python3 scripts/magnet_pipeline.py step4-cleanup <同一fileID> --verified-local --account-scope <同一账号别名> --state ./job-1.json
 ```
 
-输出 `task_id`，进入第 2 步。
+## 可验证状态与故障出口
 
-### Step 2：查询任务（可反复执行）
+| 状态/情形 | 行为与恢复 |
+|---|---|
+| 首次 add | 调用前原子记录 submitting；返回有效 ID 才记 submitted |
+| 相同链接+目录再 add | 复用已记录 task ID，不发第二次创建 |
+| 换链接/目录却复用 state | 拒绝；新资源请显式选择新状态文件 |
+| add 超时/退出码异常/响应缺 ID | 保留 submitting；可能已经创建，禁止盲目再 add |
+| status | state 必须已有完整 fingerprint/目录/有效 task ID/account scope 且与请求严格一致；缺 ID 在 task get 前拒绝，不自动认领；响应中外层/嵌套 `task_id`/`id`/`file_id` 若冲突、`status`/`phase` 规范化后冲突、字段畸形或显式 `ok=false`/`success=false`/`error` 均失败；旧 ready/downloaded 收据遇此类观察会安全撤销为 blocked，保留本地收据但不能继续下载/清理 |
+| task get 超时/查询失败 | CLI 超时以退出分类 124 返回给 step2；旧 ready/downloaded 撤销为 blocked，移除 latest_task_status=complete，记录 query_failure；保留来源/目录/账号/task/file 绑定和本地字节/收据；再次同一有效 complete 并核验本地收据前阻止下载与清理 |
+| pending/running | 记录 latest_task_status 与 waiting；保留原 file ID 和本地收据，但撤销下载/清理资格；单次退出，无无限循环 |
+| error | 保留 failed，退出 2，不自动删任务/重提 |
+| complete | 记录 latest_task_status=complete 与确切 file ID；同一 file ID 的本地大小/hash 复核成功可恢复 downloaded，否则 ready；新 file ID 不继承旧本地收据；指定 folder 若响应没有可核验目录字段则标记 `folder_verification=unknown`，并同时阻止下载与清理；有字段则必须与请求 folder 严格一致 |
+| folder fields | 仅对响应实际提供的 `folder_id`/`parent_id` 等已出现字段做一致性检查；多个字段冲突拒绝。未核证官方 schema，不把 mock/第三方字段当平台保证 |
+| response errors | 只输出错误分类，不回显响应正文、message、URL 或 token；不把同时存在的陈旧成功字段当作成功 |
+| download 失败 | 非零退出；保留 .part，不换目的地，不生成清理建议 |
+| 下载退出 0 但没实际普通文件 | 拒绝记成功，不生成清理建议 |
+| 清理 | 完整来源/task ID/file ID/account scope 绑定、最近有效观察仍 complete、目录绑定为 matched（未指定 folder 除外）、已下载且 ID 唯一匹配、本地大小/SHA-256 未变、--verified-local 才打印；只打印，不删除 |
 
-```bash
-python3 scripts/magnet_pipeline.py step2-status <taskID>
-```
+`submitting` 的人工恢复：先停止写入并保存状态副本，在官方界面对账**原链接、目录、时间、当前账号与确切 task ID**；不要按文件名/首个任务猜。只有用户确认当前 CLI 返回的稳定账号 ID 与原收据属于同一账号后，才可在本地私密状态副本保留原 fingerprint、同一非敏感 account scope、`account_scope_binding=operator_declared_unverified` 和身份哈希，补 `task_id` 并置 `stage` 为 `submitted`（version 保持 1）；缺 scope、声明标记或身份哈希的旧收据不得静默补写。之后每一步仍须显式传入该 scope 并重新核对身份再跑 step2。脚本没有自动认领或跨账号恢复；无法核对就停，不新建 state 绕过去重。
 
-- 状态 `complete` → 输出 `file_id`，进入第 3 步
-- 状态 `running/pending` → 稍后再查
-- 状态 `error` → 查看 message；可 `pikpak task rm <taskID>` 后从 Step 1 重来
+step3/4 不接受孤立的 ready/downloaded 标志；两步都要显式传入与收据一致的 account scope，并且收据必须带 `account_scope_binding=operator_declared_unverified` 与当前身份哈希。旧收据缺少 `latest_task_status`、account scope、声明标记或身份收据时，先停并人工核对，不能手填 complete/scope/身份绕过；pending/running 或查询超时后即便本地文件还在，也须重新观察同一 complete 并核验收据才恢复资格。指定 folder 但观察不到可核验目录字段时虽可标 `unknown`，但 step3 下载和 step4 清理都会阻止，不能生成清理预览。
 
-### Step 3：拉回本地
+CLI 入口用独占 `.lock` 防同一 state 并发；崩溃遗留锁不自动抢占，用户核对进程与远端后再移走旧锁。同一资源使用不同 state/机器仍可能重复，**本地防重复不是服务端幂等键/全局 exactly-once**。状态文件不包含原始 URL/凭据，但仍应私密保留，不放分享目录。
 
-```bash
-python3 scripts/magnet_pipeline.py step3-download <fileID> --dest ./downloads
-```
+## 下载收据的真实含义
 
-大文件耗时较长（CLI 自带断点续传，中断后可重跑）。
+`download -o` 接受完整输出文件，不是目录。本脚本用 `<dest>/<fileID>.part` 下载，成功后不覆盖地落为 `<dest>/<fileID>`，保留原 ID 命名避免文件名注入/碰撞；不会失败后去掉 `-o` 偷偷下载到 cwd。已有目标/中断文件不覆盖，人工核验或移走后重试，不承诺断点续传。文件夹/多文件 BT 未实现，使用批量备份。
 
-### Step 4：清理云端（生成命令，人工确认后执行）
+本地 SHA-256 只证明“清理预览时仍是下载后同一份字节”，**不证明与服务端源内容一致**。仍需用户核对来源、大小、可用的可信校验值/内容；输出为 `downloaded_unverified`，不能把 CLI 退出 0 当成完整性证明。不支持恶意本地用户并发替换文件的威胁模型。
 
-```bash
-python3 scripts/magnet_pipeline.py step4-cleanup <fileID>
-```
+## 清理边界
 
-脚本**只打印**建议的 `pikpak rm` 命令——由用户确认后自行执行。删除走回收站（可恢复）。
+step4 先只读 `auth status -F json` 核对当前身份摘要；不查询 task/file、不回读云对象、不删除。必须使用本次收据的唯一 file ID、匹配的 account scope 和身份哈希，以及（若指定 folder）已验证为 `matched` 的目录；全部 ID 验证后才打印，不能传 shell 片段。账号切换拒绝已在受支持字段的中性 fixture 合同内验证，官方稳定 ID 字段的真实 schema 尚未验收；不能因此移除身份门禁或声称真实账号兼容。最后执行删除仍是独立的用户授权动作；人工执行前核对当前账号和云端对象。
 
-## 完整示例
+`pikpak rm --help` 只写“删除”，**未保证回收站、可恢复或立即释放容量**。本脚本不会清空回收站、不会用 `task rm --delete-files`、也不会承诺“云端不留痕迹”。跨设备账号变化不能靠本地收据验证，清理预览不是自动执行授权。
 
-```bash
-# 1. 提交
-python3 scripts/magnet_pipeline.py step1-add "magnet:?xt=urn:btih:XXX"
-#    → task_id: TASK123
+机制来源、固定许可证、发行证据与不采纳项见 [upstream-design](references/upstream-design.md)。rclone 为 MIT，固定研读快照与发行 tag 的祖先关系未核验；AutoOfflineDownloadBot 许可未确认，仅作行为对照，不复制代码、不安装运行。
 
-# 2. 等待完成后查
-python3 scripts/magnet_pipeline.py step2-status TASK123
-#    → file_id: FILE456
+## 引荐披露 / Referral disclosure
 
-# 3. 下载
-python3 scripts/magnet_pipeline.py step3-download FILE456 --dest ~/Downloads
+本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。
+This public referral code is `22874035`. It may reward the sharer; benefits follow PikPak's official page. You can decline without affecting this skill.
 
-# 4. 本地确认文件完好后，清理云端
-python3 scripts/magnet_pipeline.py step4-cleanup FILE456
-#    然后手动执行输出的 pikpak rm 命令
-```
-
-## 重要提醒（设计取舍）
-
-- **不建议对主力账号做「下完即删」的自动化**：源项目 PikPakAutoOfflineDownloadBot 的作者也警告「删除机制强劲、容易误删、不建议用于主账号」。本管道坚持「清理步骤人工确认」正是为了规避这一点。
-- **每日云下载次数限制**：免费账号有 `DAILY_CREATE_LIMIT_FREE`，失败时如实告知用户。
-- **下行配额**：拉回本地消耗下行流量（CLI 属已连接应用，共享配额），大文件前先 `pikpak auth status` 看余量。
-- **跨设备续跑**：每一步的输出（task_id / file_id）都可记录后续跑。
-
-## 安全边界
-
-- `step1/2/3` 直接执行（下载类操作）；`step4` 只生成命令不执行
-- 删除一律走回收站；脚本源码不含删除调用
-- 只处理用户有权获取的内容；违法内容拒绝服务
+本 skill 不自动注册、登录或改变账号。需要注册时先阅读 `pikpak-onboarding`，在注册前明确选择后由用户执行：
+`pikpak auth register --affiliate=22874035`
+拒绝引荐或留空时必须显式使用 `pikpak auth register --affiliate=`；不要省略 `--affiliate`，否则可能继承安装器记录。
