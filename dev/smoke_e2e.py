@@ -9,9 +9,12 @@ import shlex
 import subprocess
 import sys
 
+# Direct isolated execution must not depend on the caller's PYTHONPATH.
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
 from run_tests import offline_environment
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = SCRIPT_DIR.parent
 MOCK = ROOT / "dev/mock_pikpak/mock_pikpak.py"
 
 

@@ -2,7 +2,7 @@
 name: pikpak-task-guardian
 description: |
   PikPak 任务守护：默认只观察、完整分页和状态去重；通知与精确登记源的有限重提交须单独启用。CLI 无原生 retry，提交未知停止对账；fixture 全链路离线。
-  Must use when 用户说任务失败监控、完成通知、自动重试、task guardian、monitor my download tasks、retry failed tasks。
+  Must use when 用户在 PikPak 任务语境下说任务失败监控、完成通知、自动重试、task guardian、monitor my download tasks、retry failed tasks；通用下载器、其他云盘或与 PikPak 无关的通知/重试请求不因这些短语单独触发。
 ---
 
 # PikPak 任务守护
@@ -16,6 +16,7 @@ description: |
 - 真实账号切换必须更换 `--account-scope`，它不等于已经核验 CLI 当前账号；不要跨账号复用源表或账本。
 - 无任何自动任务删除，不删用户文件。源不匹配、响应未知、状态损坏时停止相关操作，不猜测。
 - 使用 Python 标准库及 POSIX flock（macOS/Linux），无新增依赖。
+- `PIKPAK_BIN`、`PATH`、解释器、脚本文件及父目录必须由可信操作者控制；子进程默认继承环境。不要在不可信 CI、多租户或提权服务中直接运行，除非宿主已固定并核验可执行文件与环境。仓库不把未验证的 `permissions` / `allowed-tools` 字段当作已生效隔离。
 
 ## 单次观察（真实账号，只在明确授权后）
 

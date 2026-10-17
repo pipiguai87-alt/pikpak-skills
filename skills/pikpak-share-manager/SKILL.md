@@ -9,6 +9,8 @@ description: |
 
 脚本只有 `share ls` 读取能力，不创建、续期、恢复或撤销分享。先确认用户授权访问账号；测试只用 fixture/mock。
 
+运行前提：若通过 `PIKPAK_BIN` 覆写 CLI，它必须由可信本地操作者设置并指向受信执行文件；`PATH`、解释器、脚本及父目录同样必须可信，子进程默认继承环境。不要在不可信 CI、多租户或提权服务中直接运行；仓库不假称未验证的 `permissions` / `allowed-tools` 字段会被宿主强制执行。
+
 ```bash
 python3 scripts/share_audit.py --json ./report.json
 # 固定 UTC 审计时点，可重复复核，不依赖“今天”

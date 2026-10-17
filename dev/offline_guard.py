@@ -228,8 +228,10 @@ def _prepare(argv, supplied_env, state):
             _deny("child environment override")
     if argv[0] == PYTHON:
         rest = argv[1:]
-        if rest[:1] == ["-B"]:
-            rest = rest[1:]
+        # Permit only the isolation flags used by approved harness entrypoints.
+        # No arbitrary interpreter flags or inline code are accepted.
+        while rest and rest[0] in ("-B", "-I"):
+            rest.pop(0)
         if not rest or not Path(rest[0]).is_absolute() or Path(rest[0]).is_symlink():
             _deny("interpreter flags or script path")
         script, args = Path(rest[0]).resolve(), rest[1:]

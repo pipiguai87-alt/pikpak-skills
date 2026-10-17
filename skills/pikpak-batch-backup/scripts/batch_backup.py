@@ -4,6 +4,8 @@
 
 不覆盖已有文件，不提供字节断点续传或远端内容完整性保证。
 --dry-run 不下载；只有 --from-fixture --dry-run 完全离线。
+
+PIKPAK_BIN 仅是可信本地启动环境中的可执行文件覆写；命令以参数列表运行，不启用 shell。不要让远端输入、不可信 CI 或多租户调用方控制该环境变量、PATH 或父目录。
 """
 from __future__ import annotations
 

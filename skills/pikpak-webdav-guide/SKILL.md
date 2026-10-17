@@ -76,7 +76,7 @@ rclone lsd pikpak-dav:
 
 ## 附带检查脚本的限制
 
-`scripts/webdav_check.py` 是账号元数据提示工具，不会生成 WebDAV 凭据，也不测 WebDAV 可连接性或实际传输配额。默认拒绝访问账号；开发/演示使用中性 JSON fixture：
+`scripts/webdav_check.py` 是账号元数据提示工具，不会生成 WebDAV 凭据，也不测 WebDAV 可连接性或实际传输配额。若使用 `PIKPAK_BIN`，它只是由可信本地操作者设置的 CLI 启动器覆写；`PIKPAK_BIN`、`PATH`、解释器、脚本及父目录必须可信，子进程默认继承环境，不适用于不可信自动化。仓库不假称未验证的 `permissions` / `allowed-tools` 字段会被宿主强制执行。默认拒绝访问账号；开发/演示使用中性 JSON fixture：
 
 ```bash
 python3 scripts/webdav_check.py --from-fixture /path/to/neutral-metadata.json --json

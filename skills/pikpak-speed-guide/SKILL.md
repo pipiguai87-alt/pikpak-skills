@@ -1,7 +1,7 @@
 ---
 name: pikpak-speed-guide
 description: >-
-  Use when PikPak downloads are slow or playback seeks stall. PikPak 下载慢、限速或拖动卡顿时，先做无账号连通性探测，再用有限文件片段做完整性校验后的 A/B 测速；按证据选择客户端、WebDAV 或第三方工具，不承诺绕限速。
+  Use when PikPak downloads are slow or playback seeks stall. PikPak 下载慢、限速或拖动卡顿时，先做无账号连通性探测，再用通过相同前缀样本 SHA-256 一致性门禁的 A/B 测速；按证据选择客户端、WebDAV 或第三方工具，不承诺绕限速。
 ---
 
 # PikPak 速度诊断与对照测量
@@ -16,6 +16,7 @@ description: >-
 - 两个脚本均为 `direct_no_proxy`：本进程不沿用系统/环境代理，也不读取代理认证；不更改机器配置。这不是用户现有代理链的 A/B 测速，结果不可冒充那条代理链的速度。
 - 不读取 PikPak 登录态。脚本开发和演示只能用中性 fixture；真实账号测量先确认是用户本人有权使用的账号。
 - 签名直链可能带访问凭据，不让用户贴进聊天、命令行参数或截图。只由用户保存在本机私有 URL 文件中，报告不包含源 URL。
+- 两个脚本的文件、网络和进程边界是代码级约束，不等于宿主已替它们施加机器可执行权限。部署时只允许用户指定的私有 URL 文件、固定 HTTPS/loopback 目的地和受控解释器；仓库不把未验证的 `permissions` / `allowed-tools` 字段当作已生效隔离。
 
 ## 1. 收集最少必要信息
 

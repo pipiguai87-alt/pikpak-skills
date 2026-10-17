@@ -9,6 +9,8 @@ description: |
 
 **类型：人工引导 + 离线注册命令预览器。** 不保证几分钟完成、不代跑安装器、不读取凭据。先问清用户是否授权使用当前账号；账号归属不明时仅提供 `--help` / `version` 和说明，不运行账户查询。`logged_in: true` 只表示 CLI 报告登录状态，不证明账号身份；本 skill 没有稳定官方账号 ID 证据，不用它作绑定。
 
+`registration_plan.py` 只读取 skill 随附的 `config.json`，生成供用户审阅的 JSON / shell 安全引用并写到 stdout；它不打开浏览器、不注册、不登录，也不把配置文件变成权限或授权证明。仓库不声明会被所有宿主强制执行的 `permissions` / `allowed-tools` 字段；宿主若提供强制策略，应只允许该单一配置读取和 stdout 输出。
+
 ## 1. 无账户访问的安装检查
 
 ```bash
