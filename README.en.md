@@ -51,6 +51,33 @@ Then just talk to your agent in plain language: "scan my PikPak for ad files", "
 
 > Prerequisite: PikPak CLI (official install page: https://mypikpak.com/cli — review and install it yourself).
 
+### Also on ClawHub
+
+```
+clawhub install @pipiguai87-alt/pikpak-onboarding
+```
+
+All 14 skills are published to ClawHub; slugs match the directory names, e.g. `@pipiguai87-alt/pikpak-speed-guide`.
+
+### What to say to trigger each skill
+
+| You say | Skill used |
+|---|---|
+| Scan my drive for bundled-ad files | `pikpak-ad-cleaner` |
+| Find duplicate movies in my drive | `pikpak-dedup` |
+| Save this magnet link to PikPak | `pikpak-save` |
+| Which files take up the most space | `pikpak-storage-report` |
+| Downloads are slow / seeking keeps stalling | `pikpak-speed-guide` |
+| How do I mount PikPak in Infuse over WebDAV | `pikpak-webdav-guide` |
+| My tasks keep failing, watch them for me | `pikpak-task-guardian` |
+| Save links via Telegram | `pikpak-telegram-bot` |
+| Search my drive for a file | `pikpak-search` |
+| Build an index of my videos | `pikpak-media-index` |
+| Back up a whole folder to my disk | `pikpak-batch-backup` |
+| Check whether my share links expired | `pikpak-share-manager` |
+| Download a magnet locally, then clean the cloud copy | `pikpak-magnet-pipeline` |
+| I'm new to PikPak, where do I start | `pikpak-onboarding` |
+
 ## Design principles
 
 - **Read-only first**: cleanup and dedup tools only run `pikpak ls` scans (enforced at source level, with regression tests watching), never silently delete

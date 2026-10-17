@@ -53,6 +53,33 @@ npx skills add pipiguai87-alt/pikpak-skills
 
 > 前置：PikPak CLI（官方安装页 https://mypikpak.com/cli ，按页面说明自行安装）。不装 CLI 的话部分技能（如纯搜索类）不可用，装了才能完整发挥。
 
+### 也可以在 ClawHub 安装
+
+```
+clawhub install @pipiguai87-alt/pikpak-onboarding
+```
+
+14 个 skill 全部已发布到 ClawHub，slug 与目录名一致，例如 `@pipiguai87-alt/pikpak-speed-guide`。
+
+### 直接说人话就能触发
+
+| 你说 | 用到的 skill |
+|---|---|
+| 帮我扫一下网盘里的广告文件 | `pikpak-ad-cleaner` |
+| 查一下有没有重复的电影 | `pikpak-dedup` |
+| 这个磁力帮我存到 PikPak | `pikpak-save` |
+| 我网盘哪些文件最占地方 | `pikpak-storage-report` |
+| 下载好慢 / 拖动一直卡 | `pikpak-speed-guide` |
+| 怎么用 WebDAV 挂到 Infuse | `pikpak-webdav-guide` |
+| 任务总是失败，帮我盯着 | `pikpak-task-guardian` |
+| 用 Telegram 遥控存链接 | `pikpak-telegram-bot` |
+| 在网盘里搜某个文件 | `pikpak-search` |
+| 给视频建一份索引表 | `pikpak-media-index` |
+| 把整个文件夹备份到本地 | `pikpak-batch-backup` |
+| 查分享链接有没有过期 | `pikpak-share-manager` |
+| 磁力下到本地再清云端 | `pikpak-magnet-pipeline` |
+| 第一次用 PikPak，怎么开始 | `pikpak-onboarding` |
+
 ## 设计原则
 
 - **只读先行**：清理与查重工具只执行 `pikpak ls` 扫描（源码级保证，有回归测试盯着），绝不静默删除
