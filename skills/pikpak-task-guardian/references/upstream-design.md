@@ -21,14 +21,22 @@
 
 ## 官方本机 CLI 帮助证据
 
-以下沿用先前 `--help` / `--version` 证据（`v0.5.3`）；本轮修复未运行任何 PikPak 命令，不代表重新实测：
+以下沿用先前 `--help` / `--version` 证据（`v0.5.3`）；本轮修复未运行任何 PikPak 命令，不代表重新实测。
+
+本 skill 只调用只读查询类子命令（任务状态与列表）。帮助文本中出现的其他子命令仅作为能力边界记录，**本 skill 不构造、不预览、不执行任何删除类调用**：
 
 ```text
-pikpak task: add / get / ls / rm / watch
-pikpak task ls: -l/--limit, -s/--phase (pending/running/error/complete), --token
-pikpak task add <url>: -p/--parent, -w/--watch
-pikpak task rm: --delete-files (also delete associated files)
+只读查询（本 skill 实际使用）:
+  task ls    -l/--limit, -s/--phase (pending/running/error/complete), --token
+  task get   <task-id>
+  task watch <task-id>
+
+仅作边界记录（本 skill 不使用）:
+  task add   订阅新的远端任务
+  task 管理  移除任务记录；该子命令存在一个可选开关，可在移除记录的同时删除关联云端文件
 ```
+
+本 skill 的源码回归（`test_guardian_no_file_ops`）逐字断言 `task_guardian.py` 中不出现删除类参数，因此上表的边界记录不会转化为运行时能力。
 
 `task retry` **不在子命令表中**。尝试 `task retry --help` 会落回父帮助且退出 0，故“help 成功”不等于该命令存在。删除任务记录和删除关联文件也不是一件事；基线没传 `--delete-files`，不能声称它会删云文件。本次直接移除所有自动 `task rm`，保留原任务记录。
 
