@@ -7,6 +7,9 @@ description: |
 
 # PikPak 批量下载到本地
 
+**语言 / Language**: 本 skill 的说明、帮助文本与错误信息以简体中文为主，面向中文用户；这是有意的区域定位，不是强制。仓库同时提供英文 README（`README.en.md`）；脚本的 `--json` 输出与退出码不依赖语言，可直接被其他语言的调用方解析，请以机器可读输出作为程序接口。
+This skill's docs, help text and errors are primarily Simplified Chinese and target a Chinese-speaking audience by design. English readers can use `README.en.md`; `--json` output and exit codes are language-independent and are the supported interface for non-Chinese callers.
+
 当前是保守的单次复制工具，不是版本化备份或可恢复快照系统。
 
 运行前提：`PIKPAK_BIN`、`PATH`、Python 解释器、脚本文件及其父目录必须由当前操作者控制；子进程默认继承环境。不要把环境变量交给远端输入、不可信 CI、多租户或提权服务。仓库不把未验证的 `permissions` / `allowed-tools` 字段当作宿主隔离证明；需要不可信部署时，应由宿主固定并核验可执行文件和环境后再运行。

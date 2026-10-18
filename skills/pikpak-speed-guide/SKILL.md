@@ -110,7 +110,12 @@ python3 scripts/speed_bench.py \
 
 会员及配额规则以官方页面和用户当前账户页面为准，不宣称网络优化可绕过这些规则。
 
+**语言 / Language**: 本 skill 的说明、帮助文本与错误信息以简体中文为主，面向中文用户；这是有意的区域定位，不是强制。仓库同时提供英文 README（`README.en.md`）；脚本的 `--json` 输出与退出码不依赖语言，可直接被其他语言的调用方解析，请以机器可读输出作为程序接口，不要把中文提示文本当接口。
+This skill's documentation, help text and error messages are primarily Simplified Chinese and target a Chinese-speaking audience by design. English readers can use `README.en.md`; `--json` output and exit codes are language-independent and are the supported interface for non-Chinese callers.
+
 ## 引荐披露 / Referral disclosure
+
+> **本披露与服务内容无关，不影响任何诊断结论。** 本 skill 的测速、诊断与建议完全基于测量数据，邀请码不会改变推荐结果，也不构成对 PikPak 付费的引导。
 
 本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。
 This public referral code is `22874035`. It may reward the sharer; benefits follow PikPak's official page. You can decline without affecting this skill.
