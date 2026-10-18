@@ -7,6 +7,10 @@ description: |
 
 # PikPak 单资源管道
 
+**语言 / Language**: 本 skill 的说明、帮助文本与错误信息以简体中文为主，面向中文用户；这是有意的区域定位，不是强制。仓库同时提供英文 README（`README.en.md`），英文用户可据此了解全部能力边界；脚本的机器可读输出（`--json`、`-F json`）与退出码不依赖语言，可直接被其他语言的调用方解析。如需其他语言的支持，请以机器可读输出为准，不要把中文提示文本作为程序接口。
+
+This skill's documentation, help text and error messages are primarily Simplified Chinese and target a Chinese-speaking audience by design. English readers can use `README.en.md` for the full capability and limitation overview. Machine-readable output (`--json`, `-F json`) and exit codes are language-independent and are the supported interface for non-Chinese callers.
+
 本地执行器，不是“来去无痕迹”服务。**一项资源一个 --state 文件**；同一状态文件记录来源指纹→task ID→file ID→本地路径/大小/SHA-256，并记录非敏感 `account scope` 别名、`account_scope_binding=operator_declared_unverified` 和当前登录身份的域隔离 SHA-256。别名只是操作者声明，不是身份验证；脚本只接受 `auth status -F json` 白名单位置中的稳定账号 ID，缺失或冲突就停止，不回显或保存原值。正式 CLI 的实际 JSON 字段尚未按真实账号验收确认，中性假 CLI 不代表实盘兼容。
 
 ## 本地执行环境与文案边界
