@@ -2,6 +2,7 @@
 name: pikpak-webdav-guide
 description: >-
   Use when setting up PikPak WebDAV, mounting a personal media library, or connecting Infuse/VidHub/rclone. 引导 PikPak 官方 WebDAV 开通、客户端接入与只读验收，区分官方 WebDAV 与原生 PikPak 驱动，说明会员、权限和配额限制；不承诺绕限速。
+  Triggers: PikPak WebDAV, mount PikPak in Infuse, VidHub, rclone, connect media player, WebDAV speed limit, connected-app quota. WebDAV requires an active membership.
 ---
 
 # PikPak WebDAV 开通与客户端接入

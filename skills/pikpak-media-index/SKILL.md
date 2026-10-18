@@ -3,6 +3,7 @@ name: pikpak-media-index
 description: |
   为 PikPak 视频候选生成 Markdown/CSV 元数据索引，按已知时长/分辨率筛选，显示脱敏来源；字段缺失标未知，不从文件名猜时长或编码。
   用于整理媒体库、视频清单、4K/时长筛选、media index。
+  Use when building a searchable index of videos in PikPak: duration, resolution, codec, media library catalogue, 4K filter. Unknown fields stay unknown; never guesses from filenames.
 ---
 
 # PikPak 媒体元数据索引

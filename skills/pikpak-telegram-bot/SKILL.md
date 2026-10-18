@@ -3,6 +3,7 @@ name: pikpak-telegram-bot
 description: |
   用 Telegram Bot 遥控 PikPak：授权私聊或群内授权发送者提交链接、查询任务与根目录。标准库长轮询，持久 update/message 去重，提交未知不自动重放；部署与发送必须获明确授权。
   Must use when 用户提到 Telegram 遥控 PikPak、TG 机器人存磁力、telegram bot for PikPak、send magnet via Telegram。
+  Use when controlling PikPak from Telegram: submit links in an authorized chat or group, query task status and root listing. Long polling with persistent dedup; never auto-replays an unknown submission. Deployment and outbound sends each need explicit authorization.
 ---
 
 # PikPak Telegram 遥控器
