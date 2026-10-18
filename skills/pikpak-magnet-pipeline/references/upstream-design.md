@@ -29,9 +29,11 @@ MP-01 目录被当作 `download -o` 文件路径、失败回退 cwd；MP-02 任�
 | candidate | source | license | release_or_explicit_unverified |
 |---|---|---|---|
 | rclone/rclone | [固定 getTask/waitTask](https://github.com/rclone/rclone/blob/d369079a1448c487d09d85bfe11382e16ea4e345/backend/pikpak/helper.go#L186-L215) | MIT；[固定 COPYING](https://raw.githubusercontent.com/rclone/rclone/d369079a1448c487d09d85bfe11382e16ea4e345/COPYING) | [v1.75.2](https://github.com/rclone/rclone/releases/tag/v1.75.2)，published_at `2026-10-09T11:03:19Z`；固定快照与 tag 祖先关系未核验 |
-| CJReinforce/PikPakAutoOfflineDownloadBot | [固定 README](https://github.com/CJReinforce/PikPakAutoOfflineDownloadBot/blob/473735baa88ec74aeb03b2702449f3fe8db0741d/README.md) | 未确认；[固定完整 tree](https://api.github.com/repos/CJReinforce/PikPakAutoOfflineDownloadBot/git/trees/473735baa88ec74aeb03b2702449f3fe8db0741d?recursive=1) 未列出 LICENSE，不能据此认定不存在其他许可 | 发行未核验；[releases/latest](https://api.github.com/repos/CJReinforce/PikPakAutoOfflineDownloadBot/releases/latest) 本次返回 404，仅说明该 endpoint 无 latest，不证明不存在其他发行 |
+| CJReinforce/PikPakAutoOfflineDownloadBot | [固定 README](https://github.com/CJReinforce/PikPakAutoOfflineDownloadBot/blob/473735baa88ec74aeb03b2702449f3fe8db0741d/README.md) | 未确认；固定完整 tree 端点 `GET /repos/CJReinforce/PikPakAutoOfflineDownloadBot/git/trees/473735baa88ec74aeb03b2702449f3fe8db0741d?recursive=1` 未列出 LICENSE，不能据此认定不存在其他许可 | 发行未核验；端点 `GET /repos/CJReinforce/PikPakAutoOfflineDownloadBot/releases/latest` 本次返回 404，仅说明该 endpoint 无 latest，不证明不存在其他发行 |
 
-rclone 许可证原文及 [releases/latest](https://api.github.com/repos/rclone/rclone/releases/latest) 已公开读取，该发行 `draft=false`、`prerelease=false`；不把固定研读快照称作发行代码，不以 pushed_at/stars 替代发行或兼容性验收。Bot **许可未确认，仅作行为对照，不复制代码、不安装运行**；README 可读不构成代码移植许可。两者都只借鉴机制，没有安装、执行上游程序。
+rclone 许可证原文及端点 `GET /repos/rclone/rclone/releases/latest` 已公开读取，该发行 `draft=false`、`prerelease=false`；不把固定研读快照称作发行代码，不以 pushed_at/stars 替代发行或兼容性验收。Bot **许可未确认，仅作行为对照，不复制代码、不安装运行**；README 可读不构成代码移植许可。两者都只借鉴机制，没有安装、执行上游程序。
+
+以上 GitHub API 端点均以纯文本形式记录，文档不包含可点击的外部 API 链接，也不在运行时按这些端点发起请求；它们是取证时人工读取的地址记录。
 
 ### 官方 CLI — 真实参数边界
 

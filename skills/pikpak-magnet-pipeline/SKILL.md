@@ -67,7 +67,7 @@ step4 先只读 `auth status -F json` 核对当前身份摘要；不查询 task/
 
 `pikpak rm --help` 只写“删除”，**未保证回收站、可恢复或立即释放容量**。本脚本不会清空回收站、不会用 `task rm --delete-files`、也不会承诺“云端不留痕迹”。跨设备账号变化不能靠本地收据验证，清理预览不是自动执行授权。
 
-机制来源、固定许可证、发行证据与不采纳项见 [upstream-design](references/upstream-design.md)。rclone 为 MIT，固定研读快照与发行 tag 的祖先关系未核验；AutoOfflineDownloadBot 许可未确认，仅作行为对照，不复制代码、不安装运行。
+机制来源、固定许可证、发行证据与不采纳项见同目录下 `references/upstream-design.md`（纯 Markdown 文本，随本 skill 一同分发，可直接用文本编辑器完整阅读；其中不含脚本、不联网、不在运行时执行任何外部请求）。rclone 为 MIT，固定研读快照与发行 tag 的祖先关系未核验；AutoOfflineDownloadBot 许可未确认，仅作行为对照，不复制代码、不安装运行。
 
 ## 引荐披露 / Referral disclosure
 

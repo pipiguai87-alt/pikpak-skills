@@ -524,7 +524,7 @@ def step4_cleanup(args):
         if not getattr(args, 'verified_local', False):
             die('须人工验证本地副本后显式提供 --verified-local；本地 SHA-256 未证明远端源内容一致。')
     print('仅为命令预览，未删除。请确认后手动执行；先核对当前账号和本地文件。')
-    print('rm 的回收站/恢复语义未由 --help 保证，不能承诺可恢复或已释放空间。')
+    print('删除命令的回收站与恢复语义未由 --help 保证，不能承诺可恢复或已释放空间。')
     for fid in fids:
         print(shlex.join(['pikpak', 'rm', fid]))
 
