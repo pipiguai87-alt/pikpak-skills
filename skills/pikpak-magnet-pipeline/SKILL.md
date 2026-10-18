@@ -3,6 +3,7 @@ name: pikpak-magnet-pipeline
 description: |
   PikPak 单资源持久分步管道：一次创建、按任务 ID 查询、单文件落盘收据、人工核验后仅打印清理建议。
   适用于磁力/链接到本地及临时云副本。目录型 BT、无人值守删除和服务端 exactly-once 不在实现范围。
+  Use when downloading one magnet or link from PikPak to local disk in explicit steps, then deciding what to clean up in the cloud. One resource, one state file, one receipt; folder BT, unattended deletion and exactly-once are out of scope.
 ---
 
 # PikPak 单资源管道
