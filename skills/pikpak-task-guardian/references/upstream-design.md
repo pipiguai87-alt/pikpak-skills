@@ -13,9 +13,11 @@
 ## 许可证与正式发行边界
 
 - 已只读完整核验固定提交 [`LICENSE`](https://github.com/celery/celery/blob/ef37e616ef6726a2e08126635c000f3eacffcbc2/LICENSE)：**代码 BSD-3-Clause**；源码再分发须保留版权、条件和免责声明，二进制发行须在随附材料保留，不得借作者/贡献者姓名背书。其 docs 渲染内容单独为 **CC BY-SA 4.0**；不能把代码许可证套到文档。
-- 已只读核对正式发行元数据：[Celery v5.6.3](https://github.com/celery/celery/releases/tag/v5.6.3)，[GitHub releases API](https://api.github.com/repos/celery/celery/releases/latest)。**所研读 snapshot 与 tag 的祖先关系、发行制品及运行行为未核验**；此处不把 snapshot 冒充 release。
+- 已只读核对正式发行元数据：[Celery v5.6.3](https://github.com/celery/celery/releases/tag/v5.6.3)，以及端点 `GET /repos/celery/celery/releases/latest`。**所研读 snapshot 与 tag 的祖先关系、发行制品及运行行为未核验**；此处不把 snapshot 冒充 release。
 - 引用的 PTB 固定提交由 [`pyproject.toml:12-13`](https://github.com/python-telegram-bot/python-telegram-bot/blob/577e9c784607a42ff17746b9864b6416c3c30593/pyproject.toml#L12-L13) 明示 **LGPL-3.0-only**，并列出 LICENSE / LICENSE.dual / LICENSE.lesser；已读 [`LICENSE.lesser`](https://github.com/python-telegram-bot/python-telegram-bot/blob/577e9c784607a42ff17746b9864b6416c3c30593/LICENSE.lesser)。不能因 LICENSE 含 GPL v3 正文就误判整个 PTB 为 GPL-only；LICENSE.dual 的例外适用性未独立核验，不猜。
-- PTB 正式发行元数据为 [v22.8](https://github.com/python-telegram-bot/python-telegram-bot/releases/tag/v22.8)（[API](https://api.github.com/repos/python-telegram-bot/python-telegram-bot/releases/latest)）；同样未核验 snapshot/tag 祖先关系或发行运行。仅借鉴机制、未安装运行上游；若将来复用代码或文档，需另核完整许可与文件级条件。
+- PTB 正式发行元数据为 [v22.8](https://github.com/python-telegram-bot/python-telegram-bot/releases/tag/v22.8)（端点 `GET /repos/python-telegram-bot/python-telegram-bot/releases/latest`）；同样未核验 snapshot/tag 祖先关系或发行运行。仅借鉴机制、未安装运行上游；若将来复用代码或文档，需另核完整许可与文件级条件。
+
+上述 GitHub API 端点以纯文本记录，文档不含可点击的外部 API 链接，运行时也不会按这些端点发起请求；它们是取证时人工读取的地址记录。
 
 ## 官方本机 CLI 帮助证据
 

@@ -14,7 +14,7 @@
 ## 许可证与正式发行边界
 
 - 固定提交 [`pyproject.toml:12-13`](https://github.com/python-telegram-bot/python-telegram-bot/blob/577e9c784607a42ff17746b9864b6416c3c30593/pyproject.toml#L12-L13) 声明 **LGPL-3.0-only**，license-files 为 LICENSE / LICENSE.dual / LICENSE.lesser。已只读核验 [`LICENSE.lesser`](https://github.com/python-telegram-bot/python-telegram-bot/blob/577e9c784607a42ff17746b9864b6416c3c30593/LICENSE.lesser)（LGPL v3）及 [`LICENSE`](https://github.com/python-telegram-bot/python-telegram-bot/blob/577e9c784607a42ff17746b9864b6416c3c30593/LICENSE)（被 LGPL 纳入的 GPL v3 正文）；不能仅因 LICENSE 的 GPL 标题把整个项目误判为 GPL-only。LICENSE.dual 的具体适用条款未在此独立核验，不猜测例外授权。
-- 已只读核对公开正式发行元数据：[v22.8](https://github.com/python-telegram-bot/python-telegram-bot/releases/tag/v22.8)，[GitHub releases API](https://api.github.com/repos/python-telegram-bot/python-telegram-bot/releases/latest)。这不是研读 snapshot 与 tag 的祖先关系证明：**祖先关系、发行制品及运行兼容性未核验**，不把 snapshot 当作该 release。
+- 已只读核对公开正式发行元数据：[v22.8](https://github.com/python-telegram-bot/python-telegram-bot/releases/tag/v22.8)，以及端点 `GET /repos/python-telegram-bot/python-telegram-bot/releases/latest`（以纯文本记录，文档不含可点击的外部 API 链接，运行时也不发起该请求）。这不是研读 snapshot 与 tag 的祖先关系证明：**祖先关系、发行制品及运行兼容性未核验**，不把 snapshot 当作该 release。
 - 本项目只借鉴授权/调度/去重机制，未安装或运行 PTB；若将来复制或分发上游代码，须另核完整许可证及文件级条件。Celery 的代码 BSD-3-Clause / 文档 CC BY-SA 4.0 证据见 guardian 的对应 references，不将“开源”视为无条件复制授权。
 
 ## 采纳 / 不采纳 / 实际落地
