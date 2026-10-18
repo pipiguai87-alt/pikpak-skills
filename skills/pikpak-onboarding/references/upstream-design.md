@@ -25,7 +25,7 @@ Linux.do 搜索仅作候选发现，不把自动邀请、临时邮箱或加速�
 | cli/cli | [固定 login flow](https://github.com/cli/cli/blob/3d7967df5a94052b0554898ffa02526f0f90b8c9/pkg/cmd/auth/shared/login_flow.go#L204-L210) | MIT；[固定 LICENSE](https://raw.githubusercontent.com/cli/cli/3d7967df5a94052b0554898ffa02526f0f90b8c9/LICENSE) | [v2.102.0](https://github.com/cli/cli/releases/tag/v2.102.0)，published_at `2026-09-30T02:40:02Z`；固定快照与 tag 祖先关系未核验 |
 | rclone/rclone | [固定 getTask/waitTask](https://github.com/rclone/rclone/blob/d369079a1448c487d09d85bfe11382e16ea4e345/backend/pikpak/helper.go#L186-L215) | MIT；[固定 COPYING](https://raw.githubusercontent.com/rclone/rclone/d369079a1448c487d09d85bfe11382e16ea4e345/COPYING) | [v1.75.2](https://github.com/rclone/rclone/releases/tag/v1.75.2)，published_at `2026-10-09T11:03:19Z`；固定快照与 tag 祖先关系未核验 |
 
-许可证原文已公开读取。发行字段来自只读 GitHub REST [cli/cli releases/latest](https://api.github.com/repos/cli/cli/releases/latest) 和 [rclone releases/latest](https://api.github.com/repos/rclone/rclone/releases/latest)，两项均 `draft=false`、`prerelease=false`。这只证明取证时存在这些发行记录，不证明研读快照就是发行代码，也不证明本地兼容性或安全性。仅借鉴机制，不复制代码、不安装运行上游。
+许可证原文已公开读取。发行字段来自只读 GitHub REST 端点 `GET /repos/cli/cli/releases/latest` 和 `GET /repos/rclone/rclone/releases/latest`（以纯文本记录，文档不含可点击的外部 API 链接，运行时也不发起该请求），两项均 `draft=false`、`prerelease=false`。这只证明取证时存在这些发行记录，不证明研读快照就是发行代码，也不证明本地兼容性或安全性。仅借鉴机制，不复制代码、不安装运行上游。
 
 官方 PikPak CLI v0.5.3 指先前本地 version/help 证据，不是本轮重跑结果；其 GitHub 源码、许可证与发行对应关系未核验，不能借用上述其他项目的 MIT 许可或版本背书。本轮没有运行任何真实 PikPak 账号命令。
 

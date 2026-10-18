@@ -5,7 +5,7 @@
 截至 2026-10-16，经公开 GitHub `releases/latest` 元数据核验，下列正式发行均非 draft/prerelease；这里只核验 tag、公开 release URL 与发布时间（UTC），不证明该发行源码或实际运行兼容。
 
 - **rclone/rclone**：[v1.75.2](https://github.com/rclone/rclone/releases/tag/v1.75.2)，发布于 `2026-10-09T11:03:19Z`。
-- **FFmpeg 发行未核验**：[GitHub latest endpoint](https://api.github.com/repos/FFmpeg/FFmpeg/releases/latest) 返回 404，仅说明该 endpoint 未返回 latest，不能证明 FFmpeg 没有官方发行；[官方发行页](https://ffmpeg.org/releases/) 本次未核验。
+- **FFmpeg 发行未核验**：GitHub REST 端点 `GET /repos/FFmpeg/FFmpeg/releases/latest` 返回 404（以纯文本记录，文档不含可点击的外部 API 链接，运行时也不发起该请求），仅说明该 endpoint 未返回 latest，不能证明 FFmpeg 没有官方发行；[官方发行页](https://ffmpeg.org/releases/) 本次未核验。
 
 下文固定 commit 仅是研读快照；与上述 release tag 的祖先关系未核验，不能称为稳定发行源码。许可证依据仍以列出的具体快照文件为准，不把 release 元数据等同源码、许可或线上行为认证。
 

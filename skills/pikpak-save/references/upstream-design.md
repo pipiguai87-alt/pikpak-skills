@@ -27,7 +27,7 @@ baseline 只列手工命令，却宣称一键/自动批量；没有持久作业�
 | rclone/rclone | [固定 getTask/waitTask](https://github.com/rclone/rclone/blob/d369079a1448c487d09d85bfe11382e16ea4e345/backend/pikpak/helper.go#L186-L215) | MIT；[固定 COPYING](https://raw.githubusercontent.com/rclone/rclone/d369079a1448c487d09d85bfe11382e16ea4e345/COPYING) | [v1.75.2](https://github.com/rclone/rclone/releases/tag/v1.75.2)，published_at `2026-10-09T11:03:19Z`；固定快照与 tag 祖先关系未核验 |
 | cli/cli | [固定 login flow](https://github.com/cli/cli/blob/3d7967df5a94052b0554898ffa02526f0f90b8c9/pkg/cmd/auth/shared/login_flow.go#L204-L210) | MIT；[固定 LICENSE](https://raw.githubusercontent.com/cli/cli/3d7967df5a94052b0554898ffa02526f0f90b8c9/LICENSE) | [v2.102.0](https://github.com/cli/cli/releases/tag/v2.102.0)，published_at `2026-09-30T02:40:02Z`；固定快照与 tag 祖先关系未核验 |
 
-许可证原文已公开读取。发行字段来自只读 GitHub REST [rclone releases/latest](https://api.github.com/repos/rclone/rclone/releases/latest) 和 [cli/cli releases/latest](https://api.github.com/repos/cli/cli/releases/latest)，均 `draft=false`、`prerelease=false`。发行记录不等于快照/tag 对应关系或真实恢复能力验收；仅借鉴机制，不复制代码、不安装运行上游。
+许可证原文已公开读取。发行字段来自只读 GitHub REST 端点 `GET /repos/rclone/rclone/releases/latest` 和 `GET /repos/cli/cli/releases/latest`（以纯文本记录，文档不含可点击的外部 API 链接，运行时也不发起该请求），均 `draft=false`、`prerelease=false`。发行记录不等于快照/tag 对应关系或真实恢复能力验收；仅借鉴机制，不复制代码、不安装运行上游。
 
 PikPak CLI v0.5.3 是先前本地帮助证据；其 GitHub 源码、许可证与发行对应关系未核验。本轮没有运行真实账号查询、云下载或分享恢复；不能从 rclone 的 MIT 许可或发行记录推定官方 CLI 的许可或实盘语义。
 
