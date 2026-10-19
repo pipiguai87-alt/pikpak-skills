@@ -109,6 +109,8 @@ openclaw skills install @pipiguai87-alt/pikpak-onboarding
 
 同意时由用户在知情后执行：`pikpak auth register --affiliate=22874035`。拒绝或留空时必须显式执行：`pikpak auth register --affiliate=`。只省略参数或清环境变量可能继承安装器记录，不能当可靠拒绝。逐项证据与回归保存在仓库外的私人审计记录中；真实注册、账号兼容和公开 registry 更新仍分别验收。
 
+**完整注册说明见 [INVITE-CODE.md](INVITE-CODE.md)**：什么时候必须手填、12 小时期限、为什么输了码却没拿到免费天数、以及 CLI 里 `--affiliate=` 空值与省略参数的区别。
+
 ## 开发
 
 ```bash
