@@ -587,6 +587,41 @@ def load_tests(loader, tests, pattern):
     return tests
 
 
+def _run_with_crash_is_not_pass():
+    """Run the suite and classify a hard crash as NO READING, never as a pass.
+
+    An interpreter that dies mid-run has produced no verdict. Exit code 0 is
+    reserved for a completed run whose failures/errors are both zero. A crash
+    must never be indistinguishable from success, otherwise a flaky segfault
+    or OOM becomes a way to slip a gate. The raw exception is re-raised after
+    the classification line is emitted, so callers still see the real failure.
+
+    Returns the unittest result on a completed run.
+    """
+    runner = unittest.TextTestRunner(verbosity=2)
+    try:
+        with offline_environment():
+            result = runner.run(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__]))
+    except BaseException as exc:  # noqa: BLE001 - crash classification is the point
+        print(
+            "RESULT=no_reading reason=crash exception=%s" % type(exc).__name__,
+            file=sys.stderr,
+        )
+        print("RESULT=no_reading: a crashed run produced no verdict and MUST NOT be read as a pass.", file=sys.stderr)
+        raise
+    total = result.testsRun
+    failed = len(result.failures)
+    errored = len(result.errors)
+    skipped = len(result.skipped)
+    passed = total - failed - errored - skipped
+    status = "ok" if (failed == 0 and errored == 0 and total > 0) else "fail"
+    print(
+        "RESULT=%s tests=%d passed=%d skipped=%d failures=%d errors=%d"
+        % (status, total, passed, skipped, failed, errored),
+        file=sys.stderr,
+    )
+    return result
+
+
 if __name__ == "__main__":
-    with offline_environment():
-        unittest.main(verbosity=2)
+    _run_with_crash_is_not_pass()
