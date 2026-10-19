@@ -60,10 +60,14 @@ npx skills add pipiguai87-alt/pikpak-skills
 ### 也可以在 ClawHub 安装
 
 ```
-clawhub install @pipiguai87-alt/pikpak-onboarding
+openclaw skills install @pipiguai87-alt/pikpak-onboarding
 ```
 
 14 个 skill 全部已发布到 ClawHub，slug 与目录名一致，例如 `@pipiguai87-alt/pikpak-speed-guide`。
+
+> ClawHub 自带一层安装前安全审计：安装时会先跑 A.I.G 与 SkillSpector 检查并给出结论。本套 skill 的审计结论为 **Outcome: Safe**，摘要说明它们是「引导式 PikPak 设置助手，引荐码已明确披露，无隐藏自动化」。每个 skill 的审计页可在 `clawhub.ai/pipiguai87-alt/skills/<slug>/security-audit` 查看。
+
+如果用的不是 OpenClaw 而是 Claude Code / Codex / Cursor 等，用上面那条 `npx skills add` 即可；两条路径装的是同一份内容。
 
 ### 直接说人话就能触发
 

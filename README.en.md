@@ -54,10 +54,14 @@ Then just talk to your agent in plain language: "scan my PikPak for ad files", "
 ### Also on ClawHub
 
 ```
-clawhub install @pipiguai87-alt/pikpak-onboarding
+openclaw skills install @pipiguai87-alt/pikpak-onboarding
 ```
 
 All 14 skills are published to ClawHub; slugs match the directory names, e.g. `@pipiguai87-alt/pikpak-speed-guide`.
+
+> ClawHub runs a pre-install security audit (A.I.G + SkillSpector) and shows the verdict before anything is written. This suite's audit outcome is **Outcome: Safe** — summarised as "a guided PikPak setup helper with a clearly disclosed optional referral code and no hidden automation". Per-skill report: `clawhub.ai/pipiguai87-alt/skills/<slug>/security-audit`.
+
+On Claude Code / Codex / Cursor, use the `npx skills add` command above instead; both paths install the same content.
 
 ### What to say to trigger each skill
 
