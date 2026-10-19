@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-storage-report",
+  "tree_sha256": "5ae88b3f4bbe953e62f41a0fb79f50de3510e0740533dbc999faca8867fb0cb3",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 6974,
+      "sha256": "4db217655c4cd3c9404be1c961721634ba7f7fa85f0bcdb4e7f7f44f6281ad68"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 7465,
+      "sha256": "d41c1f40e4c83b2feb6254944fa2f2111621b10834d5c12ebaf43fd86fe9c94a"
+    },
+    {
+      "path": "scripts/storage_report.py",
+      "size": 20030,
+      "sha256": "6585d7c2d7b7fe2c842245f1677ca19663e7e3f25a8759c2060aa7d2c351f861"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

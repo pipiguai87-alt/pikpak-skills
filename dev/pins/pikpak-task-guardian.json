@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-task-guardian",
+  "tree_sha256": "2a51adbc991383747548fb4c40f9c7c52e64a0812d58f452214449678aa8a5e4",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 9114,
+      "sha256": "1f344c002cb670dc13bb68781b31e8c89f015c20383f8fe2bd45988867fab78c"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 10027,
+      "sha256": "c0192379916597cbb9802ed6063acc4f10acf78188d0bf52ffd7fe4ee071878a"
+    },
+    {
+      "path": "scripts/task_guardian.py",
+      "size": 31021,
+      "sha256": "8b6d26507bef2f1c7cd6a6763a2e84608f6a82caa3cc5c9f7e15e15c93ef97da"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

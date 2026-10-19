@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-magnet-pipeline",
+  "tree_sha256": "414852850824cb252f680e810bdd5376011e71b086f061abd6fa5b2aa10a774b",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 11473,
+      "sha256": "c133d5d8320fbdb5bcdef544710d241e0ad5e9777cf24ddc04cfb74504b01017"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 9377,
+      "sha256": "f1cb184e01278e3d468c3900839ec5e3b9f23ff2f6f70efd8fc4db6720cc9671"
+    },
+    {
+      "path": "scripts/magnet_pipeline.py",
+      "size": 25490,
+      "sha256": "b5e00fd6fa5b283a22ed5cda67d2898f5d974be229a2bb0fea40dfae1aec020e"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

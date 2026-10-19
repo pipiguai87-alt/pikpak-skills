@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-share-manager",
+  "tree_sha256": "fbbbc928dfb80aa6e16ee88aea1521e1a04576ed85b11e680641773384749994",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 5625,
+      "sha256": "837f11aff84d5bbf1bcdf9822e84680bd2c866bc4cafd3b29b4b84c679422a55"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 5127,
+      "sha256": "ce01f0ef86f00922047df5aac6d34df287561447353ab73866ca3b281366b090"
+    },
+    {
+      "path": "scripts/share_audit.py",
+      "size": 11854,
+      "sha256": "02d8ecb5d045b77e222b8ea7d4d25f1df85bed2768ac459b5e932bb7edbf7338"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

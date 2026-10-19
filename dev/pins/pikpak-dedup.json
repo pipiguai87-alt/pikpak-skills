@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-dedup",
+  "tree_sha256": "29f83ccb6fc71bb9312d2eb0289862500cb235456d936c944ce3cb142b8f551f",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 8848,
+      "sha256": "2154386a971598f3f37932d6272a0d80b206686d9b6bb9371cf909edf7a46709"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 8431,
+      "sha256": "0c386a640451d50db66f178bf6f2309eeba35c4cc3ad38fc5d0f17fa8a1db5ef"
+    },
+    {
+      "path": "scripts/analyze_dupes.py",
+      "size": 31424,
+      "sha256": "e95c023b8ed4c540b7c13d27788c9a437b656313f53dace358367b1f79b546e8"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

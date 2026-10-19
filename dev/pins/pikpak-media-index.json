@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-media-index",
+  "tree_sha256": "b84803aa440d0cf6ee19cbae6450a611286d220b25a12ea11b04cc5948e4fc82",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 5137,
+      "sha256": "9d65241377a9141be32a92b02128da67daa14a6c3817aea8f67472945044eeaa"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 5193,
+      "sha256": "56701e1c243b40f9a75db1bbba571e403b700843136103f17d09b565e7fd68f5"
+    },
+    {
+      "path": "scripts/media_index.py",
+      "size": 15777,
+      "sha256": "66a54a94e744cf4538d264469a21529958e34c994d13e7899cdb4fbcda2d69e4"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

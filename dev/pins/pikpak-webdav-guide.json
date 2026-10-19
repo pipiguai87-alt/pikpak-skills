@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-webdav-guide",
+  "tree_sha256": "f2c812d1deb8b42b43921b4332b4122cf8c2957b536ad3426a423830d3e505ee",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 8304,
+      "sha256": "a501297e8203e21da48415259730aa3beca57aa248f6cf7693aac12c2f36aef8"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 4669,
+      "sha256": "24455ad653d92924508679866f933b4fc9fb5531fcb743f6e1593fa782d54bcf"
+    },
+    {
+      "path": "scripts/webdav_check.py",
+      "size": 8963,
+      "sha256": "38d26e0e0929537f4f25559c4b236b516bfd8bea5acaacff44f230a709bd441a"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

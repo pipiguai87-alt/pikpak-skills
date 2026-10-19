@@ -1,0 +1,28 @@
+{
+  "skill": "pikpak-speed-guide",
+  "tree_sha256": "80455040e6d077e2a6f7496362d59d7f29825820ec3f34b06c21d325b32b2ef2",
+  "file_count": 4,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 12001,
+      "sha256": "694270e72c69ab930a4724bb15391001edef93c4ece60e776693fc8ed71d2d93"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 7660,
+      "sha256": "c55dda9453f131d21ef236eef6bc8215c9dec910660a5fd1007ccc7c557d22dd"
+    },
+    {
+      "path": "scripts/speed_bench.py",
+      "size": 21266,
+      "sha256": "1ec8abb7a0aa0607cd98dc20f142592f55c99fb4d3bf0cde6418d9273c576220"
+    },
+    {
+      "path": "scripts/speed_diag.py",
+      "size": 5816,
+      "sha256": "b2234649390c439e4712383dcf5e32d0e738f9fa35aaac3441bd2bd9c046d330"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

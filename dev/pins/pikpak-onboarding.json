@@ -1,0 +1,28 @@
+{
+  "skill": "pikpak-onboarding",
+  "tree_sha256": "b6a2eaefe286ff2c89edcb1ddf1c776a82913b2da2750793e6660d3c34dcfc28",
+  "file_count": 4,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 6966,
+      "sha256": "54805808cf7e88e53cfa3dc84160ad8077392940b8bb7988cf7df100a8b506fb"
+    },
+    {
+      "path": "config.json",
+      "size": 234,
+      "sha256": "56748329af197a07d6fd79d7fd0bcb3a962876b366526f8d9bed1e7ec8d2338c"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 5769,
+      "sha256": "19e2bf6293000d6ff4a93dde9f276d5a9b92cdca33e7cf561af661d92621ac7b"
+    },
+    {
+      "path": "scripts/registration_plan.py",
+      "size": 1487,
+      "sha256": "84258e290eafb708435a8e95315d1adeed65e2180f0464a2380524478ca526ed"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-telegram-bot",
+  "tree_sha256": "fc678878b86bb5808d3c31e8667d6a6c337061fbf3a8622f0ed30a996a1a4177",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 10702,
+      "sha256": "1743611118f44747cf6aed2d8dbb3793ae346a99755a59015050820d93b804e4"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 9165,
+      "sha256": "8ce3f8bff633f593f87c403af113282dfff81c3975bbb4d1fa59ba8d23283eab"
+    },
+    {
+      "path": "scripts/tg_bot.py",
+      "size": 44847,
+      "sha256": "5e1f14aec5ceda5909857041d7081794cbeb378e3daac4819314de5cc901e3fe"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}

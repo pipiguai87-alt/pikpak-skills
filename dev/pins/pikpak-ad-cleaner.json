@@ -1,0 +1,23 @@
+{
+  "skill": "pikpak-ad-cleaner",
+  "tree_sha256": "b214aa53fcd98cc75848d5fba3a3b112f72314fea94850d8110172ab95800240",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "size": 7563,
+      "sha256": "c270d84c6bca9a7c617c2dd9778b2cfd60880df303415fa8888b4ed996d1797d"
+    },
+    {
+      "path": "references/upstream-design.md",
+      "size": 7387,
+      "sha256": "5af90be380bc549693f36ac8937c925de8128be698066f1ad003d9387be81e74"
+    },
+    {
+      "path": "scripts/scan_ads.py",
+      "size": 26258,
+      "sha256": "c8ca066143048debc8c5e11a7a124b7440e5030ee416bb9aa63b63d1f4285596"
+    }
+  ],
+  "note": "Pinned to bytes, not to a version name. A version tag can be moved by a force-push or a re-publish; this digest cannot."
+}
