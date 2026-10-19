@@ -4,7 +4,11 @@
 
 广告文件分级扫描、多版本候选分析、远程转存、空间体检与速度对照测量。清理先报告再确认；第三方方案和实际性能分别验证，不承诺固定提速。
 
-[![skills.sh](https://skills.sh/b/pipiguai87-alt/pikpak-skills)](https://skills.sh/pipiguai87-alt/pikpak-skills)
+> **适用地区与会员档位**：技能本身不限地区。PikPak 会员分「全球会员」与「区域会员」：全球会员覆盖美、加、日、韩、德、法、英、意、澳等约 33 个国家和地区，单连接最高 20 MB/s；其他受支持地区为区域会员，价格更低、单连接最高 8 MB/s。功能相同，速度与价格按地区不同，购买前先确认自己属于哪档。
+>
+> **日本語 / 한국어 / English**: the skills work everywhere, but PikPak offers Global Premium (≈33 countries, up to 20 MB/s) and Regional Premium (other supported regions, up to 8 MB/s). Check your tier before purchasing.
+
+[![skills.sh](https://skills.sh/b/pipiguai87-alt/pikpak-skills)](https://skills.sh/b/pipiguai87-alt/pikpak-skills)
 
 | Skill | 一句话说明 | 当前成熟度（均未作生产推荐） |
 |-------|-----------|----------------------------|
