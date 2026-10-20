@@ -87,6 +87,18 @@ python3 skills/pikpak-task-guardian/scripts/task_guardian.py --help
 
 无每日 09:00 调度、无昨日日报、无 bot 自动源集成；仅累计观察记录辅助函数。真实 CLI JSON/重提交能力/通知送达、跨进程故障恢复尚未验收；未知提交需人工对账。账本增长和对账/归档界面待做。上游机制、未采纳方案和证据见 [references/upstream-design.md](references/upstream-design.md)。
 
+## 已连接应用配额 / Connected-app quota
+
+本 skill 通过 PikPak CLI 提交云下载任务，属于官方定义的「已连接的应用」。按[官方 WebDAV 限速说明](https://mypikpak.com/zh-CN/help-center/connected_apps/webdav/speed_limit)与[已连接应用配额说明](https://mypikpak.com/zh-CN/help-center/transfer_quota/connected_apps_quota)：
+
+- MCP、PAT、WebDAV、CLI 等已连接应用**共同**使用一个下行限额，等于当前有效月度下行总配额的 25%；该额度计入账号整体配额，不是额外赠送，不同维度之间不能互相抵扣。
+- 达到限额后**无法新建云下载任务**，已运行的任务继续完成；下行同时降速至约 100 KB/s，直到配额重置或限额提高。
+- 上传使用单独的已连接应用上传限额，触顶后后续上传被**拒绝**，不是降速。
+- 免费账号另有 5 GB 的**每日**已连接应用下行限额，与月度限额并行检查，命中任意一个即触发同样限制。
+- PikPak 官方 App（Android/iOS/Windows/macOS/Web/TV）不受已连接应用限额影响。
+
+因此：**「任务提交失败」或「任务一直排队」可能来自已连接应用限额，而不是源失效或账号异常**。本 skill 的退避与重试只处理限流和临时故障，不能也不应该绕过该限额——重试无法增加额度，只会消耗提交预算。诊断时先区分限额触顶与真实任务失败；具体数值以官方页面当期说明为准。
+
 ## 引荐披露 / Referral disclosure
 
 本套 skill 的公开邀请码是 `22874035`，来自分享者；使用可能让分享者获得推广奖励，福利以 PikPak 官方页面为准。你可以拒绝，不影响本 skill。

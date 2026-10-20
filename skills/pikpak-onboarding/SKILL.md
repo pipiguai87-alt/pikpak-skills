@@ -77,3 +77,16 @@ pikpak task get <taskID> -F json
 回报 CLI 版本、注册是否使用引荐、task ID 与真实状态；未完成就明确未完成。分享/播放直链、设备码、账号资料不写公开日志。只处理用户有权获取的内容，违法内容停止协助。
 
 命令来源、固定源码/许可证、发行证据与未验证边界见 [upstream-design](references/upstream-design.md)。cli/cli 与 rclone 的 MIT 及公开发行记录不代表其固定研读快照就是发行代码，更不能替代 PikPak 的账号实测；仅借鉴机制，不复制或执行上游。
+
+## 已连接应用配额 / Connected-app quota
+
+本 skill 通过 PikPak CLI 操作，属于官方定义的「已连接的应用」。按[官方 WebDAV 限速说明](https://mypikpak.com/zh-CN/help-center/connected_apps/webdav/speed_limit)与[已连接应用配额说明](https://mypikpak.com/zh-CN/help-center/transfer_quota/connected_apps_quota)：
+
+- MCP、PAT、WebDAV、CLI 等已连接应用**共同**使用一个下行限额，等于当前有效月度下行总配额的 25%；该额度计入账号整体配额，不是额外赠送，不同维度之间不能互相抵扣。
+- 达到下行限额后，下载与在线播放降速至约 100 KB/s，直到配额重置或限额提高；换客户端、增加并发都不能解除。
+- 上传使用单独的已连接应用上传限额，触顶后后续上传被**拒绝**，不是降速。
+- 达到限额后无法新建云下载任务，已运行的任务继续完成。
+- 免费账号另有 5 GB 的**每日**已连接应用下行限额，与月度限额并行检查，命中任意一个即触发同样降速。
+- PikPak 官方 App（Android/iOS/Windows/macOS/Web/TV）不受已连接应用限额影响。
+
+因此：**用 CLI 批量传输或长时间串流会先撞到 25% 上限，而不是账号总配额**。新用户在评估是否够用时，先说明这条；不要把限速归因为运营商、会员等级或客户端 bug，也不要建议用多客户端并发绕过。具体数值以官方页面当期说明为准。

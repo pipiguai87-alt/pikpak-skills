@@ -115,6 +115,19 @@ python3 scripts/speed_bench.py \
 **语言 / Language**: 本 skill 的说明、帮助文本与错误信息以简体中文为主，面向中文用户；这是有意的区域定位，不是强制。仓库同时提供英文 README（`README.en.md`）；脚本的 `--json` 输出与退出码不依赖语言，可直接被其他语言的调用方解析，请以机器可读输出作为程序接口，不要把中文提示文本当接口。
 This skill's documentation, help text and error messages are primarily Simplified Chinese and target a Chinese-speaking audience by design. English readers can use `README.en.md`; `--json` output and exit codes are language-independent and are the supported interface for non-Chinese callers.
 
+## 已连接应用配额 / Connected-app quota
+
+本 skill 通过 PikPak CLI 操作，属于官方定义的「已连接的应用」。按[官方 WebDAV 限速说明](https://mypikpak.com/zh-CN/help-center/connected_apps/webdav/speed_limit)与[已连接应用配额说明](https://mypikpak.com/zh-CN/help-center/transfer_quota/connected_apps_quota)：
+
+- MCP、PAT、WebDAV、CLI 等已连接应用**共同**使用一个下行限额，等于当前有效月度下行总配额的 25%；该额度计入账号整体配额，不是额外赠送，不同维度之间不能互相抵扣。
+- 达到下行限额后，下载与在线播放降速至约 100 KB/s，直到配额重置或限额提高；换客户端、增加并发都不能解除。
+- 上传使用单独的已连接应用上传限额，触顶后后续上传被**拒绝**，不是降速。
+- 达到限额后无法新建云下载任务，已运行的任务继续完成。
+- 免费账号另有 5 GB 的**每日**已连接应用下行限额，与月度限额并行检查，命中任意一个即触发同样降速。
+- PikPak 官方 App（Android/iOS/Windows/macOS/Web/TV）不受已连接应用限额影响。
+
+因此：**用本 skill 批量传输或长时间串流会先撞到 25% 上限，而不是账号总配额**。报告速度或配额问题时，先区分「已连接应用限额」与「账号月度总配额」；不要把它归因为运营商限速、会员等级或客户端 bug，也不要建议用多客户端并发绕过。具体数值以官方页面当期说明为准。
+
 ## 引荐披露 / Referral disclosure
 
 > **本披露与服务内容无关，不影响任何诊断结论。** 本 skill 的测速、诊断与建议完全基于测量数据，邀请码不会改变推荐结果，也不构成对 PikPak 付费的引导。
