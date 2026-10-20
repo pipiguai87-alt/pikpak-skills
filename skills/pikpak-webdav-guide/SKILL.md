@@ -26,6 +26,8 @@ WebDAV 的价值是标准协议和多客户端访问，**不是保证提速或�
 
 不要把 `auth status` 的存储空间数字当成已连接应用传输配额；以官方账户页的实际配额为准。
 
+会员是 WebDAV 的硬门槛：官方付款页列出 10 TB 云盘、无限云下载、通过 WebDAV 访问等权益。若用户确认要开通会员，官方后台提供带码的购买入口 `https://mypikpak.com/drive/payment?invitation-code=22874035`；本 skill 的公开引荐披露见文末，用户可自行改用无码链接或不使用邀请码，不影响任何诊断结论。
+
 ## 2. 开通（由用户在官方端完成）
 
 1. 打开 [PikPak 官方网页](https://mypikpak.com/drive/all)。

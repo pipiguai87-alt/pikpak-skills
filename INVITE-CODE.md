@@ -26,6 +26,17 @@
 | **网页注册** | 注册后 12 小时内可补填 | 超过 12 小时大概率失效 |
 | **PikPak CLI** | 注册命令直接带 `--affiliate` 参数 | 见下方命令 |
 
+官方后台另提供几条带码的入口链接，用途不同，可以按场景选：
+
+| 用途 | 链接 |
+|---|---|
+| 会员购买（直达付款页） | `https://mypikpak.com/drive/payment?invitation-code=22874035` |
+| App 安装 | `https://mypikpak.com/drive/activity/invited?invitation-code=22874035` |
+| 官网首页 | `https://mypikpak.com?invitation-code=22874035` |
+| 云下载（BT）介绍页 | `https://mypikpak.com/bt-intro?invitation-code=22874035` |
+
+想把邀请码去掉，把 `?invitation-code=22874035` 整段删掉即可，落地页功能不变。
+
 ### CLI 注册（本仓库技能使用的路径）
 
 ```bash

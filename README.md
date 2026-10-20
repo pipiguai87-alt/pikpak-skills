@@ -111,6 +111,17 @@ openclaw skills install @pipiguai87-alt/pikpak-onboarding
 
 **完整注册说明见 [INVITE-CODE.md](INVITE-CODE.md)**：什么时候必须手填、12 小时期限、为什么输了码却没拿到免费天数、以及 CLI 里 `--affiliate=` 空值与省略参数的区别。
 
+官方后台还提供四条带码的入口链接，用途不同：
+
+| 场景 | 链接 |
+|---|---|
+| 会员购买（直接到付款页，含 10 TB / WebDAV 权益说明） | `https://mypikpak.com/drive/payment?invitation-code=22874035` |
+| App 安装 | `https://mypikpak.com/drive/activity/invited?invitation-code=22874035` |
+| 官网首页 | `https://mypikpak.com?invitation-code=22874035` |
+| 云下载介绍页 | `https://mypikpak.com/bt-intro?invitation-code=22874035` |
+
+这四条只影响**会员分成**归因，不计入 AI 引荐活动的 S$1 奖励——活动口径只认 `AFFILIATE_CODE`（CLI / agent 分发流程）。
+
 ## 开发
 
 ```bash
