@@ -116,7 +116,10 @@ openclaw skills install @pipiguai87-alt/pikpak-onboarding
 ```bash
 python3 dev/run_tests.py    # fixture + loopback HTTP 回归，不访问真实账号或互联网
 bash dev/smoke_e2e.sh       # 端到端冒烟（模拟 CLI，不碰真实账号）
+python3 dev/publish_pin.py skills/pikpak-onboarding   # 打印目录树摘要，发布前后比对同一份字节
 ```
+
+`publish_pin.py` 解决的是「版本号不等于内容」：同名版本可能被覆盖或强推，扫描三次得到的可能是三份不同输入。它把目录解析成确定性树摘要，让发布步骤和事后核验能证明自己说的是同一份字节。默认只读，加 `--write` 才落盘清单。
 
 测试覆盖各项专属回归：审批范围、分页/目录环、跨类型候选、未知元数据、路径/下载完整性、任务去重/退避、授权/通知与速度测量。统一 runner 隔离 HOME/PATH/PIKPAK_BIN，默认拒绝子进程，只放行精确核准的假 CLI 和采样 worker，并经隔离 bootstrap 将 Python 审计限制带入子解释器；受覆盖的 Python socket、DNS、进程和通知入口只允许获准的中性 loopback 流量。这是防误调用措施，不是 OS 沙箱，也不承诺拦住恶意原生代码逃逸。冒烟检查强制自建假 CLI，不继承真实 CLI 覆盖变量。可选 Markdown 渲染检查需要已有解析器，缺失时明确跳过、不算通过。测试通过不代表真实账号兼容或真实网盘提速。
 
