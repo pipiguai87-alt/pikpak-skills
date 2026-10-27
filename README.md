@@ -55,7 +55,9 @@ npx skills add pipiguai87-alt/pikpak-skills
 
 装完直接在 Agent 里说人话，比如「帮我扫一下 PikPak 里的广告文件」「查一下我的网盘里有没有重复的电影」——技能会自己接管。
 
-> 前置：PikPak CLI（官方安装页 https://mypikpak.com/cli ，按页面说明自行安装）。不装 CLI 的话部分技能（如纯搜索类）不可用，装了才能完整发挥。
+> **前置条件（14 个技能全都需要）**：PikPak CLI。官方安装页 <https://mypikpak.com/cli>，按页面说明自行安装（约 2 分钟）。装完执行 `pikpak version` 确认，再 `pikpak auth login` 登录。
+>
+> 没有 CLI 时，14 个技能**没有一个能真正执行**——它们都是对 CLI 的封装，不是纯文本建议。安装技能本身不会安装 CLI。
 
 ### 也可以在 ClawHub 安装
 

@@ -49,7 +49,9 @@ npx skills add pipiguai87-alt/pikpak-skills
 
 Then just talk to your agent in plain language: "scan my PikPak for ad files", "find duplicate movies in my drive" — the skill takes over.
 
-> Prerequisite: PikPak CLI (official install page: https://mypikpak.com/cli — review and install it yourself).
+> **Prerequisite (all 14 skills need it):** PikPak CLI. Official install page: <https://mypikpak.com/cli> — review and install it yourself (about 2 minutes). Verify with `pikpak version`, then `pikpak auth login`.
+>
+> Without the CLI, **none of the 14 skills can actually run** — every one wraps the CLI rather than offering standalone advice. Installing a skill does not install the CLI.
 
 ### Also on ClawHub
 
