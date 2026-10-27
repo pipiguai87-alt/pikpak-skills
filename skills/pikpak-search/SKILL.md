@@ -1,8 +1,7 @@
 ---
 name: pikpak-search
-description: |
-  在 PikPak 中遍历目录并本地匹配文件名/路径，支持 AND/OR、正则、file/folder/any、排序及 JSON。用于云盘搜索、找文件或文件夹。
-  Use when searching a PikPak drive for files or folders by name or path: keyword, AND/OR, regex, sort by name/size/time, JSON output. Traverses directories locally; does not rely on a server-side search API.
+description: >-
+  Search a PikPak drive by filename when the official CLI has no search command, returning a bounded result list. 云端文件名搜索，补 CLI 缺口。
 ---
 
 # PikPak 遍历式搜索

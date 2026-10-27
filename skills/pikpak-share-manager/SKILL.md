@@ -1,9 +1,7 @@
 ---
 name: pikpak-share-manager
-description: |
-  审计 PikPak 分享列表的已知过期/临期/零访问字段，输出只读报告；提供需人工授权的分享管理指引，不自动创建或撤销分享。
-  用于分享管理、分享过期检查、share audit。
-  Use when auditing PikPak share links for expiry, near-expiry or zero-visit status. Read-only report; never creates or revokes shares automatically.
+description: >-
+  Create, inspect and revoke PikPak share links in batches, with full preview before any change. 分享链接批量管理，改动前先预览。
 ---
 
 # PikPak 分享审计与人工管理

@@ -1,8 +1,8 @@
 ---
 name: pikpak-speed-guide
 description: >-
-  Use when PikPak downloads are slow or playback seeks stall. PikPak 下载慢、限速或拖动卡顿时，先做无账号连通性探测，再用通过相同前缀样本 SHA-256 一致性门禁的 A/B 测速；按证据选择客户端、WebDAV 或第三方工具，不承诺绕限速。
-  Triggers: PikPak slow download, PikPak throttling, playback buffering, seek stalling, speed test, A/B comparison.
+  Diagnose slow PikPak downloads with a controlled A/B speed test, then pick between client, WebDAV and third-party tools on evidence. 测速诊断，不承诺绕限速。
+  Triggers: PikPak slow download, PikPak throttling, playback buffering, seek stalling, speed test, WebDAV speed.
   日本語: PikPak のダウンロードが遅い、再生のシークが固まるとき。速度制限の回避は約束しません。한국어: PikPak 다운로드가 느리거나 재생 탐색이 멈출 때. 속도 제한 우회를 보장하지 않습니다.
 ---
 

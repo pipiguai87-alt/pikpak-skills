@@ -1,9 +1,7 @@
 ---
 name: pikpak-batch-backup
-description: |
-  按 PikPak 文件夹树生成下载计划并安全复制到新的本地目录；不覆盖已有文件，校验大小，生成本地 SHA-256 清单。尚不支持增量、字节续传或远端内容校验。
-  用于云盘备份到本地、批量下载、备份计划与完整性边界咨询。
-  Use when backing up a PikPak folder to local disk in one pass: download plan, never overwrite existing files, verify size, write a local SHA-256 manifest. No resume, no incremental sync, no remote content verification.
+description: >-
+  Back up PikPak folders to a local disk by folder or manifest, with resume, checksums and a backup record. 批量备份到本地，支持断点续传与校验。
 ---
 
 # PikPak 批量下载到本地

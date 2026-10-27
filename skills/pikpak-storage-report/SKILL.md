@@ -1,9 +1,7 @@
 ---
 name: pikpak-storage-report
-description: |
-  只读统计 PikPak 目录体积、文件数与大文件 TOP，适用于空间体检、容量报告、哪些文件占地方、storage full、largest files。
-  明确扫描完整性与未知大小；不自动删除，不把扫描字节数伪装为账号配额。
-  Use when checking what is filling up a PikPak drive: folder sizes, file counts, largest files, storage full, space usage. Read-only; never deletes and never reports scanned bytes as account quota.
+description: >-
+  Report what is filling a PikPak drive: folder sizes, file counts and largest files, without deleting anything. 空间体检只读，不把扫描字节当配额。
   Triggers: PikPak 容量不足, ストレージ不足, 容量がいっぱい, PikPak 용량 부족, 저장 공간 부족, 空間不足, 大文件, 大きいファイル.
 ---
 

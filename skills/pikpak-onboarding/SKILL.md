@@ -1,10 +1,8 @@
 ---
 name: pikpak-onboarding
-description: |
-  PikPak 新用户人工引导：用户自行安装、知情选择引荐、浏览器注册登录、按任务 ID 核对首个云下载。
-  适用于 PikPak 怎么用、怎么注册、CLI 安装与首个磁力/链接转存。不宣称无人值守注册或自动恢复。
-  Use when getting started with PikPak, installing the PikPak CLI, registering an account, or saving a first magnet link or share link. Guided steps only; no unattended signup and no automatic recovery.
-  Triggers: PikPak 使い方, PikPak 登録, PikPak 始め方, PikPak 사용법, PikPak 가입, PikPak 怎么用, PikPak 註冊, PikPak 新手.
+description: >-
+  Set up PikPak with the CLI: install, informed referral choice, browser signup, and a first verified cloud download. 引导 PikPak 安装、注册与首个磁力/链接转存；不代注册、不代登录。
+  Triggers: PikPak 使い方, PikPak 登録, PikPak 始め方, PikPak 사용법, PikPak 가입, PikPak 怎么用, PikPak 註冊, PikPak 注册, PikPak 邀请码
 ---
 
 # PikPak 新手上路

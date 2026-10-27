@@ -1,9 +1,7 @@
 ---
 name: pikpak-save
-description: |
-  PikPak 手工转存操作卡与离线任务收据检查器：链接提交、按确切 ID 查询、分享选择性恢复。
-  用户说存到 PikPak、云下载、保存分享链接时使用。不是有持久账本的一键批量作业系统。
-  Use when saving a magnet link, URL or share link into PikPak, or checking the status of a specific task by exact ID. Not a persistent batch job system.
+description: >-
+  Save magnet links, URLs and share links into PikPak, then check each task by its exact ID. 引导 PikPak 转存与云下载收据核对；不是持久队列。
 ---
 
 # PikPak 转存操作卡
