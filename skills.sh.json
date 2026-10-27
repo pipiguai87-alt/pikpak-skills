@@ -6,6 +6,7 @@
       "title": "入门",
       "description": "新用户从零开始使用 PikPak：安装、注册、第一个云下载任务。",
       "skills": [
+        "pikpak-start",
         "pikpak-onboarding"
       ]
     },

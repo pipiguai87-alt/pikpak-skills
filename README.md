@@ -12,7 +12,8 @@
 
 | Skill | 一句话说明 | 当前成熟度（均未作生产推荐） |
 |-------|-----------|----------------------------|
-| **pikpak-onboarding** | 分步安装与注册引导；注册前披露引荐关系，明确允许拒绝 | 实验：操作卡与离线计划器；真实注册未验 |
+| **pikpak-start** | 分步安装与注册引导；注册前披露引荐关系，明确允许拒绝 | 实验：操作卡与离线计划器；真实注册未验 |
+| **pikpak-onboarding** | 与 `pikpak-start` 内容相同，保留旧名以兼容已有链接 | 同上 |
 | **pikpak-ad-cleaner** | 广告候选分级扫描；冻结报告与逐 ID 批准后仅生成命令预览 | 实验：离线扫描与批准预览；真实账号未验 |
 | **pikpak-dedup** | 按媒体类型隔离的多版本候选分析；名称相似不冒充内容相同 | 实验：离线候选分析；不证明内容重复 |
 | **pikpak-save** | 磁力/链接/分享转存操作卡；离线检查精确任务 ID 与下一步 | 实验：离线状态检查；真实保存闭环未通过 |
@@ -31,7 +32,7 @@
 
 ## 从哪开始？
 
-**刚接触 PikPak** → `pikpak-onboarding`
+**刚接触 PikPak** → `pikpak-start`
 **盘里一堆垃圾/重复** → `pikpak-ad-cleaner` + `pikpak-dedup`（先扫描，看清了再清）
 **想建自己的资源流** → `pikpak-save` + `pikpak-telegram-bot`
 **找文件/搜资源** → `pikpak-search`
@@ -44,7 +45,7 @@
 在支持 Agent Skills 的工具中安装，例如 Claude Code / Codex / Cursor / Hermes：
 
 ```
-npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-onboarding
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-start
 ```
 
 安装全部技能：
@@ -62,7 +63,7 @@ npx skills add pipiguai87-alt/pikpak-skills
 ### 也可以在 ClawHub 安装
 
 ```
-openclaw skills install @pipiguai87-alt/pikpak-onboarding
+openclaw skills install @pipiguai87-alt/pikpak-start
 ```
 
 14 个 skill 全部已发布到 ClawHub，slug 与目录名一致，例如 `@pipiguai87-alt/pikpak-speed-guide`。
@@ -88,7 +89,7 @@ openclaw skills install @pipiguai87-alt/pikpak-onboarding
 | 把整个文件夹备份到本地 | `pikpak-batch-backup` |
 | 查分享链接有没有过期 | `pikpak-share-manager` |
 | 磁力下到本地再清云端 | `pikpak-magnet-pipeline` |
-| 第一次用 PikPak，怎么开始 | `pikpak-onboarding` |
+| 第一次用 PikPak，怎么开始 | `pikpak-start` |
 
 ## 设计原则
 

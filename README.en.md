@@ -8,7 +8,8 @@ Review bundled-ad candidates and duplicate releases, save links, inspect storage
 
 | Skill | What it does | Current maturity (not production-recommended) |
 |-------|--------------|-----------------------------------------------|
-| **pikpak-onboarding** | Guided setup and registration, with upfront referral disclosure and an explicit opt-out | Experimental: operation cards/offline planner; live registration unverified |
+| **pikpak-start** | Guided setup and registration, with upfront referral disclosure and an explicit opt-out | Experimental: operation cards/offline planner; live registration unverified |
+| **pikpak-onboarding** | Same content as `pikpak-start`, kept under the old name for existing links | Same |
 | **pikpak-ad-cleaner** | Tiered ad-candidate scans; print-only commands require a frozen report and explicit IDs | Experimental: offline scan/approval preview; live account unverified |
 | **pikpak-dedup** | Media-family-isolated release candidates; similar names never prove identical content | Experimental: offline candidates; no proof of identical content |
 | **pikpak-save** | Save/share operation cards and an offline exact-task-ID inspector; not a background executor | Experimental: offline inspection; live save acceptance incomplete |
@@ -27,7 +28,7 @@ Listing a skill does not recommend it as usable in production. Promotion require
 
 ## Where to start?
 
-**New to PikPak** → `pikpak-onboarding`
+**New to PikPak** → `pikpak-start`
 **Drive full of junk/dupes** → `pikpak-ad-cleaner` + `pikpak-dedup` (scan first, review, then clean)
 **Building a resource pipeline** → `pikpak-save` + `pikpak-telegram-bot`
 **Slow downloads or seeking** → `pikpak-speed-guide` (measure before choosing a path)
@@ -38,7 +39,7 @@ Listing a skill does not recommend it as usable in production. Promotion require
 Install in a tool supporting Agent Skills, such as Claude Code / Codex / Cursor / Hermes:
 
 ```
-npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-onboarding
+npx skills add pipiguai87-alt/pikpak-skills --skill pikpak-start
 ```
 
 Or install everything:
@@ -56,7 +57,7 @@ Then just talk to your agent in plain language: "scan my PikPak for ad files", "
 ### Also on ClawHub
 
 ```
-openclaw skills install @pipiguai87-alt/pikpak-onboarding
+openclaw skills install @pipiguai87-alt/pikpak-start
 ```
 
 All 14 skills are published to ClawHub; slugs match the directory names, e.g. `@pipiguai87-alt/pikpak-speed-guide`.
@@ -82,7 +83,7 @@ On Claude Code / Codex / Cursor, use the `npx skills add` command above instead;
 | Back up a whole folder to my disk | `pikpak-batch-backup` |
 | Check whether my share links expired | `pikpak-share-manager` |
 | Download a magnet locally, then clean the cloud copy | `pikpak-magnet-pipeline` |
-| I'm new to PikPak, where do I start | `pikpak-onboarding` |
+| I'm new to PikPak, where do I start | `pikpak-start` |
 
 ## Design principles
 

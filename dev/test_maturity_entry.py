@@ -1169,8 +1169,12 @@ class TestReferralCoverage(unittest.TestCase):
     def test_every_catalog_skill_publishes_optional_referral_disclosure(self):
         catalog = json.loads((ROOT / 'skills.sh.json').read_text(encoding='utf-8'))
         names = [skill for group in catalog['groupings'] for skill in group['skills']]
-        self.assertEqual(len(names), 14)
-        self.assertEqual(len(set(names)), 14)
+        # Every catalog entry is unique and resolvable, and the two setup-entry
+        # skills (pikpak-start and its legacy alias pikpak-onboarding) both exist.
+        self.assertEqual(len(names), len(set(names)))
+        self.assertGreaterEqual(len(names), 14)
+        for entry in ('pikpak-start', 'pikpak-onboarding'):
+            self.assertIn(entry, names)
         for name in names:
             with self.subTest(skill=name):
                 text = (SKILLS / name / 'SKILL.md').read_text(encoding='utf-8')
@@ -1178,7 +1182,10 @@ class TestReferralCoverage(unittest.TestCase):
                 self.assertIn('--affiliate=', text)
                 self.assertIn('Referral disclosure', text)
                 self.assertIn('拒绝', text)
-                if name != 'pikpak-onboarding':
+                # pikpak-start owns the registration planner now; the legacy
+                # alias carries the same body, so both are exempt from the
+                # "link back to onboarding" rule the other skills follow.
+                if name not in ('pikpak-onboarding', 'pikpak-start'):
                     self.assertIn('不自动注册', text)
                     self.assertIn('pikpak-onboarding', text)
 
